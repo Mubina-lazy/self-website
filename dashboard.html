@@ -1483,6 +1483,7 @@ async function initChat() {
     document.getElementById('chatPickHint').classList.remove('hidden');
     document.getElementById('chatMsgList').classList.add('hidden');
     await loadAdminThreads();
+    subscribeAdminGlobal();
   } else {
     chatThreadUserId = currentUser.id;
     selectedThreadId = currentUser.id;
@@ -1575,6 +1576,7 @@ async function loadAdminThreads() {
     const preview = info.lastMsg.startsWith('__IMG__') ? '🖼️ Rasm'
                   : info.lastMsg.startsWith('__STICKER__') ? info.lastMsg.slice(11)
                   : info.lastMsg.slice(0, 40);
+    if (uid === selectedThreadId) el.classList.add('active');
     el.innerHTML = `
       <div class="dm-item__avatar">${initials}</div>
       <div class="dm-item__info">
@@ -1610,8 +1612,31 @@ function subscribeChat(threadId) {
       event: 'INSERT', schema: 'public', table: 'chat_messages',
       filter: `thread_user_id=eq.${threadId}`
     }, payload => {
+      // Dedupe (we may have already added it optimistically)
+      if (allChatMessages.some(m => m.id === payload.new.id)) return;
       allChatMessages.push(payload.new);
       renderChat(allChatMessages);
+    }).subscribe();
+}
+
+// Admin: listen to ALL new messages to refresh the sidebar / get notified
+let adminGlobalChannel = null;
+function subscribeAdminGlobal() {
+  if (adminGlobalChannel) adminGlobalChannel.unsubscribe();
+  adminGlobalChannel = _supabase.channel('chat-admin-global')
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'chat_messages'
+    }, payload => {
+      const m = payload.new;
+      // Refresh the thread list so new users / latest messages appear
+      loadAdminThreads();
+      // If the message is for the currently open thread and from the user, show it
+      if (m.thread_user_id === selectedThreadId && !m.is_admin) {
+        if (!allChatMessages.some(x => x.id === m.id)) {
+          allChatMessages.push(m);
+          renderChat(allChatMessages);
+        }
+      }
     }).subscribe();
 }
 
@@ -1671,18 +1696,26 @@ async function sendChatMessage(msg) {
   }
 
   const userName = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
-  const { error } = await _supabase.from('chat_messages').insert({
+  const { data, error } = await _supabase.from('chat_messages').insert({
     thread_user_id: selectedThreadId,
     sender_id: currentUser.id,
     sender_name: userName,
     message: msg,
     is_admin: isAdmin
-  });
+  }).select();
   if (error) {
     // Refund credit on failure
     if (!isAdmin) setCredits(getCredits() + 1);
     console.error('Chat xato:', error);
     showChatError('Xabar yuborilmadi: ' + error.message);
+    return;
+  }
+  // Show immediately (don't wait for realtime), dedupe by id
+  if (data && data[0]) {
+    if (!allChatMessages.some(m => m.id === data[0].id)) {
+      allChatMessages.push(data[0]);
+      renderChat(allChatMessages);
+    }
   }
 }
 
