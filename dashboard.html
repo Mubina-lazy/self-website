@@ -478,49 +478,82 @@ function launchFlightAnimation(emoji, gender) {
   resize();
   window.addEventListener('resize', resize);
 
-  const LOOP_MS = gender === 'girl' ? 11000 : 16000;
+  const LOOP_MS = gender === 'girl' ? 13000 : 16000;
 
-  function getPos(t) {
+  // Different flight routes (start → end as viewport fractions). One picked per loop.
+  const ROUTES = [
+    { a: [0.05, 0.55], b: [0.95, 0.45] },  // left → right
+    { a: [0.95, 0.40], b: [0.05, 0.65] },  // right → left
+    { a: [0.50, 0.05], b: [0.50, 0.95] },  // top → bottom
+    { a: [0.50, 0.95], b: [0.50, 0.05] },  // bottom → top
+    { a: [0.06, 0.92], b: [0.94, 0.10] },  // bottom-left → top-right
+    { a: [0.94, 0.08], b: [0.06, 0.90] },  // top-right → bottom-left
+  ];
+
+  function smooth(x) { return x * x * (3 - 2 * x); }
+
+  // Small heart offset (closed loop, returns to 0 at u=0 and u=2π)
+  function heartOffset(u, scale) {
+    const hx = scale * 16 * Math.pow(Math.sin(u), 3);
+    const hy = -scale * (13*Math.cos(u) - 5*Math.cos(2*u) - 2*Math.cos(3*u) - Math.cos(4*u));
+    return { x: hx, y: hy + 5 * scale };  // shift so u=0 → (0,0)
+  }
+
+  // Girl: long flight that draws one small heart mid-route
+  function girlPos(f, route) {
     const W = window.innerWidth, H = window.innerHeight;
-    if (gender === 'girl') {
-      // Heart fixed & centered so it never leaves the screen
-      const B = Math.min(W, H) * 0.55;
-      const scale = B / 34;
-      const cx = W / 2;
-      const cy = H / 2 - 6 * scale;  // vertical centering of the heart shape
-      // Standard heart parametric (t: 0 → 2π draws one full heart)
-      const hx = cx + scale * 16 * Math.pow(Math.sin(t), 3);
-      const hy = cy - scale * (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
-      return { x: hx, y: hy };
+    const ax = route.a[0] * W, ay = route.a[1] * H;
+    const bx = route.b[0] * W, by = route.b[1] * H;
+    const hcx = (ax + bx) / 2, hcy = (ay + by) / 2;   // heart sits mid-route
+    const hScale = Math.min(W, H) / 150;              // small heart
+    if (f < 0.4) {
+      const l = smooth(f / 0.4);
+      return { x: ax + (hcx - ax) * l, y: ay + (hcy - ay) * l };
+    } else if (f < 0.6) {
+      const u = ((f - 0.4) / 0.2) * Math.PI * 2;
+      const o = heartOffset(u, hScale);
+      return { x: hcx + o.x, y: hcy + o.y };
     } else {
-      // Lissajous: covers the viewport but stays inside it
-      return {
-        x: W / 2 + W * 0.40 * Math.sin(2 * t + 0.5),
-        y: H / 2 + H * 0.36 * Math.sin(3 * t)
-      };
+      const l = smooth((f - 0.6) / 0.4);
+      return { x: hcx + (bx - hcx) * l, y: hcy + (by - hcy) * l };
     }
+  }
+
+  function boyPos(t) {
+    const W = window.innerWidth, H = window.innerHeight;
+    return {
+      x: W / 2 + W * 0.40 * Math.sin(2 * t + 0.5),
+      y: H / 2 + H * 0.36 * Math.sin(3 * t)
+    };
   }
 
   const dashColor = gender === 'girl' ? 'rgba(236,72,153,0.85)' : 'rgba(251,191,36,0.9)';
   // ✈️ and 🚀 both point to the upper-right (NE) by default → rotate by +45°
   const ROT_OFFSET = 45;
 
+  function posAt(elapsed, loop) {
+    if (gender === 'girl') {
+      const f = (elapsed % LOOP_MS) / LOOP_MS;
+      return girlPos(f, ROUTES[loop % ROUTES.length]);
+    }
+    return boyPos((elapsed / LOOP_MS) * Math.PI * 2);
+  }
+
   let lastX = 0, lastY = 0, startTime = null, loopIndex = 0;
 
   function frame(ts) {
     if (!startTime) {
       startTime = ts;
-      const p0 = getPos(0);
+      const p0 = posAt(0, 0);
       lastX = p0.x; lastY = p0.y;
     }
     const elapsed = ts - startTime;
     const currentLoop = Math.floor(elapsed / LOOP_MS);
-    if (currentLoop !== loopIndex) {   // new loop → redraw fresh heart
+    if (currentLoop !== loopIndex) {   // new loop → fresh route + trail
       loopIndex = currentLoop;
       trail = [];
     }
-    const t = (elapsed / LOOP_MS) * Math.PI * 2;
-    const { x, y } = getPos(t);
+    const { x, y } = posAt(elapsed, loopIndex);
 
     trail.push({ x, y });
 
