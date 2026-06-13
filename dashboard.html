@@ -544,8 +544,12 @@ function launchFlightAnimation(emoji, gender) {
     if (currentLoop !== loopIndex) { loopIndex = currentLoop; trail = []; }
 
     const { x, y } = posAt(elapsed);
-    trail.push({ x, y });
-    if (trail.length > 900) trail.shift();
+    // Only the girl's airplane draws a heart trail; the rocket just flies freely
+    const drawTrail = gender === 'girl';
+    if (drawTrail) {
+      trail.push({ x, y });
+      if (trail.length > 900) trail.shift();
+    }
 
     // Smoothly ease the nose toward the travel direction (no sharp snaps)
     const dx = x - lastX, dy = y - lastY;
@@ -559,7 +563,7 @@ function launchFlightAnimation(emoji, gender) {
 
     // Draw the trail as a smooth curve (quadratic through midpoints) → soft, not jagged
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (trail.length > 2) {
+    if (drawTrail && trail.length > 2) {
       ctx.setLineDash([6, 8]);
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
