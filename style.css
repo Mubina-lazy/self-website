@@ -26,40 +26,29 @@ body {
   min-height: 100vh;
 }
 
-/* ── Floating particles ── */
-.particles {
+/* ── Floating bubbles ── */
+.floating-bubble {
   position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.particles span {
-  position: absolute;
-  display: block;
+  top: 0; left: 0;
   border-radius: 50%;
-  animation: float linear infinite;
-  opacity: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  border: 1.5px solid rgba(255,255,255,0.45);
+  box-shadow:
+    inset 0 0 18px rgba(255,255,255,0.25),
+    inset -4px -4px 12px rgba(255,255,255,0.1),
+    0 6px 28px rgba(236,72,153,0.06);
+  z-index: 3;
+  backdrop-filter: blur(1.5px);
+  will-change: transform;
+  transition: filter 0.2s, border-color 0.2s;
 }
-
-.particles span:nth-child(1)  { width:12px; height:12px; left:10%;  background:#f9a8d4; animation-duration:18s; animation-delay:0s;   }
-.particles span:nth-child(2)  { width: 8px; height: 8px; left:25%;  background:#c4b5fd; animation-duration:22s; animation-delay:-4s;  }
-.particles span:nth-child(3)  { width:16px; height:16px; left:40%;  background:#fda4af; animation-duration:16s; animation-delay:-8s;  }
-.particles span:nth-child(4)  { width: 6px; height: 6px; left:55%;  background:#fdba74; animation-duration:20s; animation-delay:-2s;  }
-.particles span:nth-child(5)  { width:10px; height:10px; left:70%;  background:#f9a8d4; animation-duration:24s; animation-delay:-6s;  }
-.particles span:nth-child(6)  { width:14px; height:14px; left:80%;  background:#c4b5fd; animation-duration:17s; animation-delay:-10s; }
-.particles span:nth-child(7)  { width: 7px; height: 7px; left:15%;  background:#fda4af; animation-duration:21s; animation-delay:-14s; }
-.particles span:nth-child(8)  { width:11px; height:11px; left:60%;  background:#f9a8d4; animation-duration:19s; animation-delay:-3s;  }
-.particles span:nth-child(9)  { width: 9px; height: 9px; left:35%;  background:#c4b5fd; animation-duration:23s; animation-delay:-7s;  }
-.particles span:nth-child(10) { width:13px; height:13px; left:90%;  background:#fda4af; animation-duration:15s; animation-delay:-11s; }
-
-@keyframes float {
-  0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
-  10%  { opacity: 0.6; }
-  90%  { opacity: 0.6; }
-  100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+.floating-bubble:hover {
+  filter: brightness(1.25) saturate(1.4);
+  border-color: rgba(255,255,255,0.7);
+  cursor: grab;
 }
+.floating-bubble:active { cursor: grabbing; }
 
 /* ── Hero ── */
 .hero {

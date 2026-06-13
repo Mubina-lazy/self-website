@@ -11,12 +11,6 @@
 </head>
 <body>
 
-  <!-- Floating particles -->
-  <div class="particles" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
-  </div>
-
   <!-- Hero -->
   <section class="hero">
     <div class="hero__glow" aria-hidden="true"></div>
@@ -131,33 +125,7 @@
     );
     document.querySelectorAll('.card, .stats__item, .cta__title, .cta__text').forEach(el => observer.observe(el));
 
-    // Particle split on click
-    document.querySelectorAll('.particles span').forEach(span => {
-      span.style.pointerEvents = 'auto';
-      span.style.cursor = 'pointer';
-      span.addEventListener('click', function() {
-        const rect = this.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        this.style.opacity = '0';
-        const colors = ['#f9a8d4','#c4b5fd','#fda4af','#fdba74','#a78bfa','#67e8f9','#fbbf24'];
-        const count = 3 + Math.floor(Math.random() * 4);
-        for (let i = 0; i < count; i++) {
-          const mini = document.createElement('div');
-          const size = 5 + Math.random() * 9;
-          mini.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;border-radius:50%;background:${colors[Math.floor(Math.random()*colors.length)]};pointer-events:none;z-index:9999;transform:translate(-50%,-50%)`;
-          document.body.appendChild(mini);
-          const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
-          const dist = 50 + Math.random() * 90;
-          const tx = Math.cos(angle) * dist, ty = Math.sin(angle) * dist;
-          mini.animate([
-            { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
-            { transform: `translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
-          ], { duration: 650 + Math.random() * 450, easing: 'ease-out' }).onfinish = () => mini.remove();
-        }
-        setTimeout(() => { this.style.opacity = ''; }, 1600);
-      });
-    });
   </script>
+  <script src="bubbles.js"></script>
 </body>
 </html>
