@@ -1324,32 +1324,7 @@ body {
   100% { opacity:0; transform: translateY(-35px) scale(1.2) rotate(30deg); }
 }
 
-.rocket-deco {
-  position: fixed; top: 14px; font-size: 1.4rem;
-  pointer-events: none; z-index: 99;
-  animation: rocket-cross 10s linear infinite;
-}
-@keyframes rocket-cross {
-  0%   { left: -50px; opacity:0; transform: rotate(-20deg); }
-  5%   { opacity:1; }
-  95%  { opacity:1; }
-  100% { left: calc(100vw + 50px); opacity:0; transform: rotate(-20deg); }
-}
-
-/* Star trail behind rocket */
-.star-trail {
-  position: fixed; top: 18px; font-size: 0.6rem;
-  pointer-events: none; z-index: 99; color: #fbbf24;
-  animation: star-trail-cross 10s linear infinite;
-}
-.star-trail:nth-child(2) { animation-delay: -0.15s; font-size: 0.5rem; top: 24px; }
-.star-trail:nth-child(3) { animation-delay: -0.3s; font-size: 0.45rem; top: 20px; }
-@keyframes star-trail-cross {
-  0%   { left: -90px; opacity:0; }
-  5%   { opacity:0.8; }
-  95%  { opacity:0.8; }
-  100% { left: calc(100vw + 10px); opacity:0; }
-}
+/* Rocket and trail are now JS/canvas based */
 
 /* ════════════════════════════════
    HEART RAIN

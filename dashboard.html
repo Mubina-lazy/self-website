@@ -141,22 +141,20 @@
           </div>
         </div>
 
-        <!-- Decorative stickers -->
+        <!-- Decorative stickers (left & right edges only) -->
         <div class="inspire-stickers" aria-hidden="true">
-          <span class="isticker" style="top:4%;left:3%;font-size:2.2rem;animation-delay:0s">🌸</span>
-          <span class="isticker" style="top:8%;right:5%;font-size:1.8rem;animation-delay:0.6s">💫</span>
-          <span class="isticker" style="top:18%;left:1%;font-size:1.5rem;animation-delay:1.2s">🦋</span>
-          <span class="isticker" style="top:22%;right:2%;font-size:2rem;animation-delay:0.3s">✨</span>
-          <span class="isticker" style="top:35%;left:4%;font-size:1.6rem;animation-delay:1.8s">🌺</span>
-          <span class="isticker" style="top:38%;right:4%;font-size:1.4rem;animation-delay:0.9s">💕</span>
-          <span class="isticker" style="top:52%;left:2%;font-size:1.8rem;animation-delay:2.1s">🌷</span>
-          <span class="isticker" style="top:55%;right:3%;font-size:1.5rem;animation-delay:1.5s">🌟</span>
-          <span class="isticker" style="top:68%;left:5%;font-size:1.4rem;animation-delay:0.4s">💝</span>
-          <span class="isticker" style="top:70%;right:6%;font-size:1.6rem;animation-delay:2.4s">🍀</span>
-          <span class="isticker" style="top:82%;left:3%;font-size:1.5rem;animation-delay:1s">🎀</span>
-          <span class="isticker" style="top:85%;right:4%;font-size:1.8rem;animation-delay:0.7s">🌈</span>
-          <span class="isticker" style="top:12%;left:48%;font-size:1.3rem;animation-delay:1.4s">⭐</span>
-          <span class="isticker" style="top:60%;left:46%;font-size:1.4rem;animation-delay:2s">🫧</span>
+          <span class="isticker" style="top:5%;left:1.5%;font-size:1.9rem;animation-delay:0s">🌸</span>
+          <span class="isticker" style="top:5%;right:1.5%;font-size:1.6rem;animation-delay:0.6s">💫</span>
+          <span class="isticker" style="top:18%;left:1%;font-size:1.4rem;animation-delay:1.2s">🦋</span>
+          <span class="isticker" style="top:20%;right:1%;font-size:1.7rem;animation-delay:0.3s">✨</span>
+          <span class="isticker" style="top:34%;left:1.5%;font-size:1.5rem;animation-delay:1.8s">🌺</span>
+          <span class="isticker" style="top:35%;right:1.5%;font-size:1.3rem;animation-delay:0.9s">💕</span>
+          <span class="isticker" style="top:50%;left:1%;font-size:1.6rem;animation-delay:2.1s">🌷</span>
+          <span class="isticker" style="top:52%;right:1%;font-size:1.4rem;animation-delay:1.5s">🌟</span>
+          <span class="isticker" style="top:67%;left:1.5%;font-size:1.3rem;animation-delay:0.4s">💝</span>
+          <span class="isticker" style="top:68%;right:1.5%;font-size:1.5rem;animation-delay:2.4s">🍀</span>
+          <span class="isticker" style="top:82%;left:1%;font-size:1.4rem;animation-delay:1s">🎀</span>
+          <span class="isticker" style="top:83%;right:1%;font-size:1.6rem;animation-delay:0.7s">🌈</span>
         </div>
 
         <div class="inspire-wrap">
@@ -407,8 +405,92 @@ function addHeaderDeco() {
     deco.className = 'header-deco';
     deco.innerHTML = '<span>✨</span><span>🌸</span><span>💫</span><span>🌷</span><span>⭐</span>';
   } else {
-    deco.innerHTML = '<div class="rocket-deco">🚀</div><div class="star-trail">⭐</div><div class="star-trail">✦</div><div class="star-trail">·</div>';
+    launchRocketAnimation();
   }
+}
+
+function launchRocketAnimation() {
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99;';
+  document.body.appendChild(canvas);
+
+  const rocketEl = document.createElement('div');
+  rocketEl.style.cssText = 'position:fixed;font-size:1.8rem;pointer-events:none;z-index:100;will-change:transform';
+  rocketEl.textContent = '🚀';
+  document.body.appendChild(rocketEl);
+
+  const ctx = canvas.getContext('2d');
+  const trail = [];
+  const TRAIL_LEN = 55;
+  const LOOPS = 2;
+  const LOOP_MS = 14000;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Lissajous path: covers whole page, loops cleanly
+  function getPos(t) {
+    const W = window.innerWidth, H = window.innerHeight;
+    return {
+      x: W / 2 + W * 0.43 * Math.sin(2 * t + 0.5),
+      y: H / 2 + H * 0.40 * Math.sin(3 * t)
+    };
+  }
+
+  let lastX = 0, lastY = 0, startTime = null;
+
+  function frame(ts) {
+    if (!startTime) {
+      startTime = ts;
+      const p = getPos(0);
+      lastX = p.x; lastY = p.y;
+    }
+    const elapsed = ts - startTime;
+    const t = (elapsed / LOOP_MS) * Math.PI * 2;
+    const { x, y } = getPos(t);
+
+    trail.push({ x, y });
+    if (trail.length > TRAIL_LEN) trail.shift();
+
+    // Rotate rocket toward direction of travel
+    const angle = Math.atan2(y - lastY, x - lastX) * 180 / Math.PI + 45;
+    rocketEl.style.left = (x - 16) + 'px';
+    rocketEl.style.top  = (y - 16) + 'px';
+    rocketEl.style.transform = `rotate(${angle}deg)`;
+
+    // Draw trail
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 1; i < trail.length; i++) {
+      const p = i / trail.length;
+      ctx.beginPath();
+      ctx.moveTo(trail[i-1].x, trail[i-1].y);
+      ctx.lineTo(trail[i].x, trail[i].y);
+      ctx.strokeStyle = `rgba(251,191,36,${p * 0.75})`;
+      ctx.lineWidth = p * 5;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    lastX = x; lastY = y;
+
+    if (elapsed < LOOP_MS * LOOPS) {
+      requestAnimationFrame(frame);
+    } else {
+      rocketEl.style.transition = 'opacity 1.2s';
+      rocketEl.style.opacity = '0';
+      setTimeout(() => {
+        rocketEl.remove();
+        canvas.remove();
+        window.removeEventListener('resize', resize);
+      }, 1300);
+    }
+  }
+
+  requestAnimationFrame(frame);
 }
 
 // ════════════════════════════════════════════
