@@ -141,25 +141,25 @@
           </div>
         </div>
 
-        <div class="inspire-wrap">
-          <div class="ai-key-bar" id="aiKeyBar">
-            <div class="ai-key-info">
-              <span>🤖</span>
-              <div>
-                <strong>AI ilhom yoqish</strong>
-                <p>Anthropic API kaliti kerak — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> dan oling</p>
-              </div>
-            </div>
-            <div class="ai-key-input-row">
-              <input type="password" id="apiKeyInput" placeholder="sk-ant-..." class="ai-key-field" />
-              <button id="saveApiKey" class="btn btn--primary">Saqlash</button>
-            </div>
-          </div>
-          <div class="ai-key-saved hidden" id="aiKeySaved">
-            <span>🤖 AI yoqilgan</span>
-            <button id="resetApiKey" class="ai-key-reset">kalitni o'chirish</button>
-          </div>
+        <!-- Decorative stickers -->
+        <div class="inspire-stickers" aria-hidden="true">
+          <span class="isticker" style="top:4%;left:3%;font-size:2.2rem;animation-delay:0s">🌸</span>
+          <span class="isticker" style="top:8%;right:5%;font-size:1.8rem;animation-delay:0.6s">💫</span>
+          <span class="isticker" style="top:18%;left:1%;font-size:1.5rem;animation-delay:1.2s">🦋</span>
+          <span class="isticker" style="top:22%;right:2%;font-size:2rem;animation-delay:0.3s">✨</span>
+          <span class="isticker" style="top:35%;left:4%;font-size:1.6rem;animation-delay:1.8s">🌺</span>
+          <span class="isticker" style="top:38%;right:4%;font-size:1.4rem;animation-delay:0.9s">💕</span>
+          <span class="isticker" style="top:52%;left:2%;font-size:1.8rem;animation-delay:2.1s">🌷</span>
+          <span class="isticker" style="top:55%;right:3%;font-size:1.5rem;animation-delay:1.5s">🌟</span>
+          <span class="isticker" style="top:68%;left:5%;font-size:1.4rem;animation-delay:0.4s">💝</span>
+          <span class="isticker" style="top:70%;right:6%;font-size:1.6rem;animation-delay:2.4s">🍀</span>
+          <span class="isticker" style="top:82%;left:3%;font-size:1.5rem;animation-delay:1s">🎀</span>
+          <span class="isticker" style="top:85%;right:4%;font-size:1.8rem;animation-delay:0.7s">🌈</span>
+          <span class="isticker" style="top:12%;left:48%;font-size:1.3rem;animation-delay:1.4s">⭐</span>
+          <span class="isticker" style="top:60%;left:46%;font-size:1.4rem;animation-delay:2s">🫧</span>
+        </div>
 
+        <div class="inspire-wrap">
           <div class="inspire-step" id="inspStep1">
             <p class="inspire-q">Hozir kayfiyating qanday?</p>
             <div class="mood-grid">
@@ -1004,7 +1004,6 @@ function showHeartRain() {
 }
 
 function initInspiration() {
-  initApiKeyUI();
 
   document.querySelectorAll('.mood-btn').forEach(btn => {
     btn.addEventListener('click', () => {
