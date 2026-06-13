@@ -221,34 +221,66 @@
 
     <!-- ═══════════ CHAT TAB ═══════════ -->
     <section class="dtab" id="tab-chat">
-      <div class="dtab-inner">
-        <div class="dtab-head">
-          <div>
-            <h2 class="dtab-title">Admin bilan suhbat</h2>
-            <p class="dtab-sub">Mubina bilan yozishmalar 💌</p>
+      <div class="dtab-inner dtab-inner--chat">
+
+        <!-- DM sidebar (admin only) -->
+        <div class="dm-sidebar hidden" id="dmSidebar">
+          <div class="dm-sidebar__head">
+            <span class="dm-sidebar__title">💬 Xabarlar</span>
+          </div>
+          <div class="dm-list" id="dmList">
+            <div class="dm-empty">Hali xabar yo'q</div>
           </div>
         </div>
 
-        <div class="chat-wrap">
-          <!-- Admin thread selector (only shown for admin) -->
-          <div class="chat-threads-bar hidden" id="chatThreadsBar"></div>
-
-          <div class="chat-admin-notice" id="chatNotice">
-            💌 Bu yerda siz Mubina bilan yozishishingiz mumkin. Savollar, takliflar, his-tuyg'ularingizni yuboring!
+        <!-- Chat main area -->
+        <div class="chat-main" id="chatMain">
+          <!-- Chat header (shown after thread selected / for users always) -->
+          <div class="chat-main-header" id="chatMainHeader">
+            <div class="chat-main-avatar" id="chatMainAvatar">M</div>
+            <div class="chat-main-info">
+              <div class="chat-main-name" id="chatMainName">Mubina</div>
+              <div class="chat-main-status">Admin</div>
+            </div>
           </div>
 
           <div class="chat-msg-list" id="chatMsgList">
             <div class="chat-empty">
               <div class="chat-empty__icon">💬</div>
-              <p>Hali xabarlar yo'q. Birinchi xabaringizni yuboring!</p>
+              <p id="chatEmptyText">Hali xabarlar yo'q. Birinchi xabaringizni yuboring!</p>
             </div>
           </div>
 
-          <div class="chat-input-row">
+          <!-- Sticker picker -->
+          <div class="sticker-picker hidden" id="stickerPicker">
+            <div class="sticker-grid" id="stickerGrid">
+              🌸 💕 🦋 ✨ 🌺 💫 🌷 💝 🎀 🌈
+              😊 😍 🥰 💗 🔥 👑 🌻 🍀 💎 🎉
+              🤩 😘 💖 🫶 🥹 🐱 🐰 🌙 ⭐ 🎵
+              😂 🤣 😭 😅 🙈 💀 👏 🫠 🫧 🦄
+            </div>
+          </div>
+
+          <div id="chatImgPreviewWrap" class="chat-img-preview-wrap hidden">
+            <img id="chatImgPreview" class="chat-img-preview-thumb" />
+            <button id="chatImgRemove" class="chat-img-remove">✕</button>
+          </div>
+
+          <div class="chat-input-row" id="chatInputRow">
+            <button class="chat-icon-btn" id="stickerToggle" title="Stiker">😊</button>
+            <label class="chat-icon-btn" for="chatImgInput" title="Rasm">🖼️</label>
+            <input type="file" id="chatImgInput" accept="image/*" class="hidden" />
             <input type="text" class="chat-input" id="chatInput" placeholder="Xabar yozing..." maxlength="500" />
-            <button class="btn btn--primary" id="chatSendBtn">Yuborish</button>
+            <button class="btn btn--primary" id="chatSendBtn">➤</button>
           </div>
         </div>
+
+        <!-- Admin: no thread selected placeholder -->
+        <div class="chat-pick-hint hidden" id="chatPickHint">
+          <div style="font-size:3rem">💌</div>
+          <p>Foydalanuvchini tanlang</p>
+        </div>
+
       </div>
     </section>
 
@@ -1261,11 +1293,18 @@ let selectedThreadId = null;
 
 async function initChat() {
   if (isAdmin) {
-    document.getElementById('chatNotice').textContent = '👑 Admin paneli — foydalanuvchilar bilan yozishmalar';
+    document.getElementById('dmSidebar').classList.remove('hidden');
+    document.getElementById('chatMain').classList.add('chat-main--admin');
+    document.getElementById('chatMainHeader').classList.add('hidden');
+    document.getElementById('chatInputRow').classList.add('hidden');
+    document.getElementById('chatPickHint').classList.remove('hidden');
+    document.getElementById('chatMsgList').classList.add('hidden');
     await loadAdminThreads();
   } else {
     chatThreadUserId = currentUser.id;
     selectedThreadId = currentUser.id;
+    const uname = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+    document.getElementById('chatMainName').textContent = '💌 Mubina';
     await loadChatMessages(currentUser.id);
     subscribeChat(currentUser.id);
   }
@@ -1276,6 +1315,16 @@ async function loadChatMessages(threadId) {
     .select('*').eq('thread_user_id', threadId).order('created_at', { ascending: true });
   allChatMessages = data || [];
   renderChat(allChatMessages);
+}
+
+function renderChatBubble(msg) {
+  if (msg.startsWith('__IMG__')) {
+    return `<img src="${msg.slice(7)}" class="chat-bubble-img" onclick="this.requestFullscreen&&this.requestFullscreen()" />`;
+  }
+  if (msg.startsWith('__STICKER__')) {
+    return `<span class="chat-bubble-sticker">${escHtml(msg.slice(11))}</span>`;
+  }
+  return escHtml(msg);
 }
 
 function renderChat(messages) {
@@ -1292,7 +1341,7 @@ function renderChat(messages) {
       <div class="chat-msg ${cls}">
         ${!isUser && !isAdminMsg ? `<div class="chat-msg__sender">${escHtml(m.sender_name || 'Foydalanuvchi')}</div>` : ''}
         ${isAdminMsg && !isAdmin ? `<div class="chat-msg__sender">💌 Mubina</div>` : ''}
-        <div class="chat-msg__bubble">${escHtml(m.message)}</div>
+        <div class="chat-msg__bubble">${renderChatBubble(m.message)}</div>
         <div class="chat-msg__time">${formatTime(m.created_at)}</div>
       </div>`;
   }).join('');
@@ -1301,40 +1350,66 @@ function renderChat(messages) {
 
 async function loadAdminThreads() {
   const { data } = await _supabase.from('chat_messages')
-    .select('thread_user_id, sender_name, message, created_at')
+    .select('thread_user_id, sender_name, message, created_at, is_admin')
     .order('created_at', { ascending: false });
-  if (!data) return;
 
-  // Group by thread user
+  const list = document.getElementById('dmList');
+  list.innerHTML = '';
+
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="dm-empty">Hali xabar yo\'q</div>';
+    return;
+  }
+
+  // Group by thread: keep latest message per thread
   const threads = {};
   data.forEach(m => {
     if (!threads[m.thread_user_id]) {
-      threads[m.thread_user_id] = { name: m.sender_name || 'Foydalanuvchi', lastMsg: m.message };
+      threads[m.thread_user_id] = {
+        name: m.is_admin ? 'Foydalanuvchi' : (m.sender_name || 'Foydalanuvchi'),
+        lastMsg: m.message,
+        time: m.created_at
+      };
+    } else if (!threads[m.thread_user_id].realName && !m.is_admin) {
+      threads[m.thread_user_id].name = m.sender_name || threads[m.thread_user_id].name;
+      threads[m.thread_user_id].realName = true;
     }
   });
 
-  const bar = document.getElementById('chatThreadsBar');
-  bar.classList.remove('hidden');
-  bar.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted);padding:0.2rem 0.5rem">Foydalanuvchilar:</span>';
   Object.entries(threads).forEach(([uid, info]) => {
-    const chip = document.createElement('button');
-    chip.className = 'thread-chip';
-    chip.textContent = info.name;
-    chip.addEventListener('click', async () => {
-      document.querySelectorAll('.thread-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      selectedThreadId = uid;
-      await loadChatMessages(uid);
-      subscribeChat(uid);
-    });
-    bar.appendChild(chip);
+    const el = document.createElement('div');
+    el.className = 'dm-item';
+    el.dataset.uid = uid;
+    const initials = info.name.charAt(0).toUpperCase();
+    const preview = info.lastMsg.startsWith('__IMG__') ? '🖼️ Rasm'
+                  : info.lastMsg.startsWith('__STICKER__') ? info.lastMsg.slice(11)
+                  : info.lastMsg.slice(0, 40);
+    el.innerHTML = `
+      <div class="dm-item__avatar">${initials}</div>
+      <div class="dm-item__info">
+        <div class="dm-item__name">${escHtml(info.name)}</div>
+        <div class="dm-item__preview">${escHtml(preview)}</div>
+      </div>
+      <div class="dm-item__time">${formatTime(info.time)}</div>`;
+    el.addEventListener('click', () => selectDmThread(uid, info.name, el));
+    list.appendChild(el);
   });
+}
 
-  // Select first thread by default
-  const firstUid = Object.keys(threads)[0];
-  if (firstUid) {
-    bar.querySelectorAll('.thread-chip')[0]?.click();
-  }
+async function selectDmThread(uid, name, el) {
+  document.querySelectorAll('.dm-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  selectedThreadId = uid;
+
+  document.getElementById('chatPickHint').classList.add('hidden');
+  document.getElementById('chatMsgList').classList.remove('hidden');
+  document.getElementById('chatInputRow').classList.remove('hidden');
+  document.getElementById('chatMainHeader').classList.remove('hidden');
+  document.getElementById('chatMainName').textContent = name;
+  document.getElementById('chatMainAvatar').textContent = name.charAt(0).toUpperCase();
+
+  await loadChatMessages(uid);
+  subscribeChat(uid);
 }
 
 function subscribeChat(threadId) {
@@ -1354,14 +1429,48 @@ document.getElementById('chatInput').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
 });
 
-async function sendChat() {
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if (!msg || !selectedThreadId) return;
-  input.value = '';
-  const btn = document.getElementById('chatSendBtn');
-  btn.disabled = true;
+// Sticker picker
+let pendingSticker = null;
+const stickerEmojis = ['🌸','💕','🦋','✨','🌺','💫','🌷','💝','🎀','🌈','😊','😍','🥰','💗','🔥','👑','🌻','🍀','💎','🎉','🤩','😘','💖','🫶','🥹','🐱','🐰','🌙','⭐','🎵','😂','🤣','😭','😅','🙈','💀','👏','🫠','🫧','🦄'];
+const stickerGrid = document.getElementById('stickerGrid');
+stickerGrid.innerHTML = '';
+stickerEmojis.forEach(emoji => {
+  const btn = document.createElement('button');
+  btn.className = 'sticker-btn';
+  btn.textContent = emoji;
+  btn.addEventListener('click', () => {
+    document.getElementById('stickerPicker').classList.add('hidden');
+    sendChatMessage('__STICKER__' + emoji);
+  });
+  stickerGrid.appendChild(btn);
+});
 
+document.getElementById('stickerToggle').addEventListener('click', () => {
+  document.getElementById('stickerPicker').classList.toggle('hidden');
+});
+
+// Image input
+let pendingChatImg = null;
+document.getElementById('chatImgInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingChatImg = ev.target.result;
+    document.getElementById('chatImgPreview').src = pendingChatImg;
+    document.getElementById('chatImgPreviewWrap').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+document.getElementById('chatImgRemove').addEventListener('click', () => {
+  pendingChatImg = null;
+  document.getElementById('chatImgPreviewWrap').classList.add('hidden');
+});
+
+async function sendChatMessage(msg) {
+  if (!selectedThreadId) return;
   const userName = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
   await _supabase.from('chat_messages').insert({
     thread_user_id: selectedThreadId,
@@ -1370,6 +1479,27 @@ async function sendChat() {
     message: msg,
     is_admin: isAdmin
   });
+}
+
+async function sendChat() {
+  if (!selectedThreadId) return;
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true;
+
+  // Send image first if pending
+  if (pendingChatImg) {
+    await sendChatMessage('__IMG__' + pendingChatImg);
+    pendingChatImg = null;
+    document.getElementById('chatImgPreviewWrap').classList.add('hidden');
+  }
+
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (msg) {
+    input.value = '';
+    await sendChatMessage(msg);
+  }
+
   btn.disabled = false;
 }
 
