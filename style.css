@@ -429,6 +429,7 @@ body {
   margin-top: 0;
 }
 .btn--outline:hover { background: rgba(236,72,153,0.08); transform: translateY(-3px); }
+.btn--sm { padding: 0.4rem 1rem; font-size: 0.85rem; }
 .btn--ghost {
   background: transparent;
   color: var(--text-muted);

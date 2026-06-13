@@ -42,6 +42,10 @@
         </div>
         <button type="submit" class="btn btn--primary btn--full" id="loginBtn">Kirish</button>
         <p class="aform__msg aform__msg--err" id="loginErr"></p>
+        <div id="resendWrap" style="display:none;text-align:center;margin-top:0.75rem">
+          <button type="button" class="btn btn--outline btn--sm" id="resendBtn">📧 Tasdiqlash xatini qayta yuborish</button>
+          <p class="aform__msg aform__msg--ok" id="resendOk"></p>
+        </div>
       </form>
 
       <!-- Register form -->
@@ -68,6 +72,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script>
+    // Handle email confirmation redirect (token in URL hash)
+    _supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
     // Redirect if already logged in
     _supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) window.location.href = 'dashboard.html';
@@ -99,12 +110,34 @@
       });
 
       if (error) {
-        errEl.textContent = error.message.includes('Invalid') ? 'Email yoki parol noto\'g\'ri' : error.message;
+        const isNotConfirmed = error.message.toLowerCase().includes('email not confirmed') ||
+                               error.message.toLowerCase().includes('not confirmed');
+        if (isNotConfirmed) {
+          errEl.textContent = '📧 Emailingiz hali tasdiqlanmagan. Pochtangizni tekshiring yoki quyidagi tugmani bosing.';
+          document.getElementById('resendWrap').style.display = 'block';
+        } else {
+          errEl.textContent = error.message.includes('Invalid') ? 'Email yoki parol noto\'g\'ri' : error.message;
+          document.getElementById('resendWrap').style.display = 'none';
+        }
         btn.textContent = 'Kirish';
         btn.disabled = false;
       } else {
         window.location.href = 'dashboard.html';
       }
+    });
+
+    // Resend confirmation email
+    document.getElementById('resendBtn').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value;
+      const resendOk = document.getElementById('resendOk');
+      const resendBtn = document.getElementById('resendBtn');
+      if (!email) { resendOk.textContent = 'Email kiriting'; return; }
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Yuborilmoqda...';
+      const { error } = await _supabase.auth.resend({ type: 'signup', email });
+      resendOk.textContent = error ? '❌ Xatolik: ' + error.message : '✅ Tasdiqlash xati yuborildi! Pochtangizni tekshiring.';
+      resendBtn.textContent = '📧 Tasdiqlash xatini qayta yuborish';
+      resendBtn.disabled = false;
     });
 
     // Register
