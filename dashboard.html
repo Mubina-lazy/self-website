@@ -408,24 +408,69 @@ function addHeaderDeco() {
   if (userGender === 'girl') {
     launchFlightAnimation('✈️', 'girl');
   } else {
+    createGalaxy();
     launchFlightAnimation('🚀', 'boy');
   }
 }
 
+function createGalaxy() {
+  const g = document.createElement('div');
+  g.className = 'galaxy-bg';
+
+  // Glowing sun + moon
+  g.innerHTML = `
+    <div class="galaxy-sun"></div>
+    <div class="galaxy-moon"></div>
+  `;
+
+  // Twinkling stars
+  const W = window.innerWidth, H = window.innerHeight;
+  const starCount = 90;
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement('span');
+    star.className = 'galaxy-star';
+    const size = Math.random() * 2.5 + 1;
+    star.style.cssText = `
+      left:${Math.random() * 100}%;
+      top:${Math.random() * 100}%;
+      width:${size}px;height:${size}px;
+      animation-delay:${Math.random() * 3}s;
+      animation-duration:${1.8 + Math.random() * 2.4}s;
+    `;
+    g.appendChild(star);
+  }
+
+  // A few bigger sparkle stars
+  for (let i = 0; i < 7; i++) {
+    const sp = document.createElement('span');
+    sp.className = 'galaxy-sparkle';
+    sp.textContent = '✦';
+    sp.style.cssText = `
+      left:${Math.random() * 100}%;
+      top:${Math.random() * 100}%;
+      font-size:${0.6 + Math.random() * 0.8}rem;
+      animation-delay:${Math.random() * 4}s;
+    `;
+    g.appendChild(sp);
+  }
+
+  document.body.appendChild(g);
+}
+
 function launchFlightAnimation(emoji, gender) {
   const canvas = document.createElement('canvas');
-  // Behind content (z-index 2) but above bubbles (z-index 0)
-  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2;';
+  // z-index 0 → behind content (dash-main is z-index 1), above body background
+  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:0;';
   document.body.appendChild(canvas);
 
   const el = document.createElement('div');
-  el.style.cssText = 'position:fixed;font-size:1.8rem;pointer-events:none;z-index:3;will-change:transform;line-height:1';
+  el.style.cssText = 'position:fixed;font-size:1.8rem;pointer-events:none;z-index:0;will-change:transform;line-height:1';
   el.textContent = emoji;
   document.body.appendChild(el);
 
   const ctx = canvas.getContext('2d');
   const trail = [];
-  const TRAIL_LEN = 60;
+  const TRAIL_LEN = 70;
 
   function resize() {
     canvas.width = window.innerWidth;
@@ -434,34 +479,32 @@ function launchFlightAnimation(emoji, gender) {
   resize();
   window.addEventListener('resize', resize);
 
-  // Girl: heart parametric curve (one full heart = one loop)
-  // Boy: Lissajous curve (covers whole page)
-  const LOOP_MS = gender === 'girl' ? 16000 : 14000;
-  const LOOPS   = gender === 'girl' ? 1.05  : 2;
+  // One loop duration (animation runs forever)
+  const LOOP_MS = gender === 'girl' ? 9000 : 16000;
 
   function getPos(t) {
     const W = window.innerWidth, H = window.innerHeight;
     if (gender === 'girl') {
-      // Heart curve centered on screen, scaled to ~55% of smaller dimension
-      const s = Math.min(W, H) * 0.28;
-      const cx = W / 2, cy = H / 2 + s * 0.1;
-      // Standard heart parametric (upright heart, t goes 0→2π)
-      const hx = cx + s * 16 * Math.pow(Math.sin(t), 3);
-      const hy = cy - s * (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+      // Small heart, drifting slowly across the page so it isn't static
+      const s = Math.min(W, H) / 42;               // heart radius factor
+      const driftX = (Math.sin(t * 0.18) * 0.5 + 0.5) * (W - 320) + 160;
+      const driftY = (Math.cos(t * 0.13) * 0.5 + 0.5) * (H - 320) + 160;
+      // Standard heart parametric (upright)
+      const hx = driftX + s * 16 * Math.pow(Math.sin(t), 3);
+      const hy = driftY - s * (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
       return { x: hx, y: hy };
     } else {
-      // Lissajous: covers full viewport
+      // Lissajous: covers full viewport, loops cleanly
       return {
-        x: W / 2 + W * 0.43 * Math.sin(2 * t + 0.5),
-        y: H / 2 + H * 0.40 * Math.sin(3 * t)
+        x: W / 2 + W * 0.42 * Math.sin(2 * t + 0.5),
+        y: H / 2 + H * 0.38 * Math.sin(3 * t)
       };
     }
   }
 
-  // Trail color
   const trailColor = gender === 'girl'
-    ? (p) => `rgba(244,114,182,${p * 0.7})`   // pink for airplane
-    : (p) => `rgba(251,191,36,${p * 0.75})`;   // amber for rocket
+    ? (p) => `rgba(244,114,182,${p * 0.75})`   // pink for airplane
+    : (p) => `rgba(251,191,36,${p * 0.8})`;    // amber for rocket
 
   let lastX = 0, lastY = 0, startTime = null;
 
@@ -478,15 +521,12 @@ function launchFlightAnimation(emoji, gender) {
     trail.push({ x, y });
     if (trail.length > TRAIL_LEN) trail.shift();
 
-    // Rotate toward travel direction
     let angle = Math.atan2(y - lastY, x - lastX) * 180 / Math.PI;
-    // ✈️ default faces right; 🚀 default faces up-left → adjust
-    angle += gender === 'girl' ? 0 : 45;
+    angle += gender === 'girl' ? 0 : 45;  // ✈️ faces right, 🚀 faces up-left
     el.style.left = (x - 16) + 'px';
     el.style.top  = (y - 16) + 'px';
     el.style.transform = `rotate(${angle}deg)`;
 
-    // Draw trail
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 1; i < trail.length; i++) {
       const p = i / trail.length;
@@ -500,18 +540,7 @@ function launchFlightAnimation(emoji, gender) {
     }
 
     lastX = x; lastY = y;
-
-    if (elapsed < LOOP_MS * LOOPS) {
-      requestAnimationFrame(frame);
-    } else {
-      el.style.transition = 'opacity 1.2s';
-      el.style.opacity = '0';
-      setTimeout(() => {
-        el.remove();
-        canvas.remove();
-        window.removeEventListener('resize', resize);
-      }, 1300);
-    }
+    requestAnimationFrame(frame);  // loop forever
   }
 
   requestAnimationFrame(frame);
