@@ -460,6 +460,8 @@ body {
   padding: 2rem 1.25rem;
 }
 
+.auth-wrap { position: relative; z-index: 1; }
+
 .auth-wrap {
   width: 100%;
   max-width: 420px;
