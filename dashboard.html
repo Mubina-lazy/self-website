@@ -11,12 +11,13 @@
 </head>
 <body class="dash-body">
 
-  <!-- Header -->
   <header class="dash-header">
     <a href="index.html" class="dash-logo">with <em>Mubina</em></a>
     <nav class="dash-nav">
-      <button class="dnav active" data-tab="notes">📓 Daftarim</button>
-      <button class="dnav" data-tab="challenge">🏆 30 Kun</button>
+      <button class="dnav active" data-tab="notes">📓</button>
+      <button class="dnav" data-tab="draw">🎨</button>
+      <button class="dnav" data-tab="inspire">✨</button>
+      <button class="dnav" data-tab="challenge">🏆</button>
     </nav>
     <div class="dash-user">
       <span id="userName"></span>
@@ -24,10 +25,9 @@
     </div>
   </header>
 
-  <!-- Main -->
   <main class="dash-main">
 
-    <!-- ── NOTES TAB ── -->
+    <!-- ═══════════ NOTES TAB ═══════════ -->
     <section class="dtab dtab--active" id="tab-notes">
       <div class="dtab-inner">
         <div class="dtab-head">
@@ -38,11 +38,29 @@
           <button class="btn btn--primary" id="newNoteBtn">+ Yangi yozuv</button>
         </div>
 
-        <!-- New note form -->
         <div class="note-form-wrap hidden" id="noteFormWrap">
           <div class="note-form">
             <input type="text" id="noteTitle" placeholder="Sarlavha (ixtiyoriy)" class="note-form__title" />
+            <div class="note-fmt-bar">
+              <button type="button" class="fmt-btn" data-wrap="**" title="Bold"><b>B</b></button>
+              <button type="button" class="fmt-btn" data-wrap="*" title="Italic"><i>I</i></button>
+              <button type="button" class="fmt-btn" data-emoji="🌸" title="Emoji">🌸</button>
+              <button type="button" class="fmt-btn" data-emoji="💫" title="Emoji">💫</button>
+              <button type="button" class="fmt-btn" data-emoji="✨" title="Emoji">✨</button>
+              <button type="button" class="fmt-btn" data-emoji="💕" title="Emoji">💕</button>
+              <button type="button" class="fmt-btn" data-emoji="🌷" title="Emoji">🌷</button>
+            </div>
             <textarea id="noteContent" placeholder="Bugun nima haqida yozmoqchisiz?..." class="note-form__body" rows="5"></textarea>
+            <div class="note-img-row">
+              <label class="img-upload-label" for="noteImage">
+                🖼 Rasm qo'shish
+                <input type="file" id="noteImage" accept="image/*" class="hidden" />
+              </label>
+              <div id="imgPreview" class="img-preview hidden">
+                <img id="imgPreviewSrc" src="" alt="preview" />
+                <button type="button" id="removeImg" class="img-remove">✕</button>
+              </div>
+            </div>
             <div class="note-form__actions">
               <button class="btn btn--primary" id="saveNoteBtn">Saqlash</button>
               <button class="btn btn--ghost" id="cancelNoteBtn">Bekor qilish</button>
@@ -50,7 +68,6 @@
           </div>
         </div>
 
-        <!-- Notes list -->
         <div class="notes-grid" id="notesGrid">
           <div class="notes-empty" id="notesEmpty">
             <div class="notes-empty__icon">📝</div>
@@ -60,7 +77,109 @@
       </div>
     </section>
 
-    <!-- ── CHALLENGE TAB ── -->
+    <!-- ═══════════ DRAWING TAB ═══════════ -->
+    <section class="dtab" id="tab-draw">
+      <div class="dtab-inner">
+        <div class="dtab-head">
+          <div>
+            <h2 class="dtab-title">Chizish & Bo'yash</h2>
+            <p class="dtab-sub">Ijodingni erkin ifodala 🎨</p>
+          </div>
+          <div class="draw-actions-top">
+            <button class="btn btn--ghost" id="clearCanvas">🗑 Tozalamoq</button>
+            <button class="btn btn--primary" id="downloadCanvas">⬇ Yuklamoq</button>
+          </div>
+        </div>
+
+        <div class="draw-workspace">
+          <!-- Templates -->
+          <div class="draw-templates">
+            <p class="draw-templates-label">Shablon tanlang:</p>
+            <div class="draw-templates-row">
+              <button class="tpl-btn" data-tpl="flower">🌸 Gul</button>
+              <button class="tpl-btn" data-tpl="butterfly">🦋 Kapalak</button>
+              <button class="tpl-btn" data-tpl="mandala">🔮 Mandala</button>
+              <button class="tpl-btn" data-tpl="heart">💕 Yurak</button>
+              <button class="tpl-btn tpl-btn--clear" id="clearTemplate">✕ Toza</button>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="draw-toolbar">
+            <div class="tool-group">
+              <button class="tool-btn tool-btn--active" id="toolBrush" title="Mo'yqalam">🖌</button>
+              <button class="tool-btn" id="toolEraser" title="O'chirg'ich">⬜</button>
+            </div>
+            <div class="tool-group">
+              <button class="size-btn size-btn--active" data-size="4">S</button>
+              <button class="size-btn" data-size="10">M</button>
+              <button class="size-btn" data-size="20">L</button>
+              <button class="size-btn" data-size="36">XL</button>
+            </div>
+            <div class="color-palette" id="colorPalette"></div>
+            <input type="color" id="customColor" value="#ec4899" class="custom-color" title="O'z rang" />
+          </div>
+
+          <!-- Canvas -->
+          <div class="canvas-wrap">
+            <canvas id="drawCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ INSPIRATION TAB ═══════════ -->
+    <section class="dtab" id="tab-inspire">
+      <div class="dtab-inner">
+        <div class="dtab-head">
+          <div>
+            <h2 class="dtab-title">Ilhom olish</h2>
+            <p class="dtab-sub">Bugun qanday his qilyapsan? ✨</p>
+          </div>
+        </div>
+
+        <div class="inspire-wrap">
+          <!-- Step 1: Mood -->
+          <div class="inspire-step" id="inspStep1">
+            <p class="inspire-q">Hozir kayfiyating qanday?</p>
+            <div class="mood-grid">
+              <button class="mood-btn" data-mood="happy">😊<span>Baxtliman</span></button>
+              <button class="mood-btn" data-mood="sad">😔<span>Tushkunman</span></button>
+              <button class="mood-btn" data-mood="strong">💪<span>Kuchli</span></button>
+              <button class="mood-btn" data-mood="anxious">😰<span>Xavotirliman</span></button>
+              <button class="mood-btn" data-mood="searching">🤔<span>Izlanyapman</span></button>
+            </div>
+          </div>
+
+          <!-- Step 2: Topic -->
+          <div class="inspire-step hidden" id="inspStep2">
+            <p class="inspire-q">Qaysi mavzuda ilhom kerak?</p>
+            <div class="topic-grid">
+              <button class="topic-btn" data-topic="self">💝 O'zingni sev</button>
+              <button class="topic-btn" data-topic="goals">🌟 Maqsadlar</button>
+              <button class="topic-btn" data-topic="hard">🌧 Qiyin kunlar</button>
+              <button class="topic-btn" data-topic="creative">🎨 Ijod & Salohiyat</button>
+              <button class="topic-btn" data-topic="relation">🌸 Munosabatlar</button>
+            </div>
+          </div>
+
+          <!-- Response -->
+          <div class="inspire-response hidden" id="inspResponse">
+            <div class="insp-card">
+              <div class="insp-card__emoji" id="inspEmoji"></div>
+              <div class="insp-card__text" id="inspText"></div>
+              <div class="insp-card__prompt" id="inspPrompt"></div>
+            </div>
+            <div class="insp-actions">
+              <button class="btn btn--primary" id="saveToDiary">📓 Daftarimga yozish</button>
+              <button class="btn btn--ghost" id="inspAgain">🔄 Yana bir bor</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ CHALLENGE TAB ═══════════ -->
     <section class="dtab" id="tab-challenge">
       <div class="dtab-inner">
         <div class="dtab-head">
@@ -73,18 +192,14 @@
             <div class="ch-progress-bar"><div class="ch-progress-fill" id="progressFill"></div></div>
           </div>
         </div>
-
-        <!-- Today's highlight -->
         <div class="ch-today" id="chToday"></div>
-
-        <!-- All days grid -->
         <div class="ch-grid" id="chGrid"></div>
       </div>
     </section>
 
   </main>
 
-  <!-- Note viewer modal -->
+  <!-- Note modal -->
   <div class="modal-overlay hidden" id="noteModal">
     <div class="modal">
       <div class="modal-head">
@@ -92,6 +207,7 @@
         <button class="modal-close" id="modalClose">✕</button>
       </div>
       <p class="modal-date" id="modalDate"></p>
+      <img id="modalImg" src="" alt="" class="modal-img hidden" />
       <div class="modal-body" id="modalContent"></div>
       <button class="btn btn--danger" id="deleteNoteBtn">🗑 O'chirish</button>
     </div>
@@ -100,194 +216,616 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script>
-    let currentUser = null;
-    let notes = [];
-    let completedDays = new Set();
-    let viewingNoteId = null;
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let currentUser = null;
+let notes = [];
+let completedDays = new Set();
+let viewingNoteId = null;
+let pendingImageB64 = null;
+let selectedMood = null;
 
-    // ── Auth check ──
-    async function init() {
-      const { data: { session } } = await _supabase.auth.getSession();
-      if (!session) { window.location.href = 'auth.html'; return; }
-      currentUser = session.user;
-      document.getElementById('userName').textContent =
-        currentUser.user_metadata?.name || currentUser.email.split('@')[0];
-      await Promise.all([loadNotes(), loadChallenges()]);
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { window.location.href = 'auth.html'; return; }
+  currentUser = session.user;
+  document.getElementById('userName').textContent =
+    currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+  await Promise.all([loadNotes(), loadChallenges()]);
+  initCanvas();
+  initInspiration();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await _supabase.auth.signOut();
+  window.location.href = 'index.html';
+});
+
+// Tab nav
+document.querySelectorAll('.dnav').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dnav').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.dtab').forEach(t => t.classList.remove('dtab--active'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('dtab--active');
+  });
+});
+
+// ════════════════════════════════════════════
+// NOTES
+// ════════════════════════════════════════════
+async function loadNotes() {
+  const { data, error } = await _supabase
+    .from('notes').select('*').eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+  if (!error) { notes = data; renderNotes(); }
+}
+
+function renderNotes() {
+  const grid = document.getElementById('notesGrid');
+  const empty = document.getElementById('notesEmpty');
+  grid.querySelectorAll('.note-card').forEach(el => el.remove());
+  if (!notes.length) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  notes.forEach(note => {
+    const card = document.createElement('div');
+    card.className = 'note-card';
+    const hasImg = note.image && note.image.length > 0;
+    card.innerHTML = `
+      ${hasImg ? `<div class="note-card__thumb"><img src="${note.image}" alt="" /></div>` : ''}
+      <div class="note-card__date">${formatDate(note.created_at)}</div>
+      <h3 class="note-card__title">${note.title || 'Sarlavsiz'}</h3>
+      <p class="note-card__preview">${stripMd(note.content).slice(0, 100)}${note.content.length > 100 ? '...' : ''}</p>
+    `;
+    card.addEventListener('click', () => openNote(note));
+    grid.appendChild(card);
+  });
+}
+
+// Formatting bar
+document.querySelectorAll('.fmt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const ta = document.getElementById('noteContent');
+    if (btn.dataset.emoji) {
+      const pos = ta.selectionStart;
+      ta.value = ta.value.slice(0, pos) + btn.dataset.emoji + ta.value.slice(pos);
+      ta.selectionStart = ta.selectionEnd = pos + btn.dataset.emoji.length;
+    } else if (btn.dataset.wrap) {
+      const w = btn.dataset.wrap;
+      const start = ta.selectionStart, end = ta.selectionEnd;
+      const sel = ta.value.slice(start, end) || 'matn';
+      ta.value = ta.value.slice(0, start) + w + sel + w + ta.value.slice(end);
+      ta.selectionStart = start + w.length;
+      ta.selectionEnd = start + w.length + sel.length;
     }
+    ta.focus();
+  });
+});
 
-    // ── Logout ──
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await _supabase.auth.signOut();
-      window.location.href = 'index.html';
+// Image upload
+document.getElementById('noteImage').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingImageB64 = ev.target.result;
+    document.getElementById('imgPreviewSrc').src = pendingImageB64;
+    document.getElementById('imgPreview').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('removeImg').addEventListener('click', () => {
+  pendingImageB64 = null;
+  document.getElementById('imgPreview').classList.add('hidden');
+  document.getElementById('noteImage').value = '';
+});
+
+document.getElementById('newNoteBtn').addEventListener('click', () => {
+  document.getElementById('noteFormWrap').classList.toggle('hidden');
+  document.getElementById('noteContent').focus();
+});
+
+document.getElementById('cancelNoteBtn').addEventListener('click', () => {
+  document.getElementById('noteFormWrap').classList.add('hidden');
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteContent').value = '';
+  pendingImageB64 = null;
+  document.getElementById('imgPreview').classList.add('hidden');
+  document.getElementById('noteImage').value = '';
+});
+
+document.getElementById('saveNoteBtn').addEventListener('click', async () => {
+  const content = document.getElementById('noteContent').value.trim();
+  if (!content) return;
+  const title = document.getElementById('noteTitle').value.trim();
+  const { error } = await _supabase.from('notes').insert({
+    user_id: currentUser.id, title, content,
+    image: pendingImageB64 || null
+  });
+  if (!error) {
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteContent').value = '';
+    pendingImageB64 = null;
+    document.getElementById('imgPreview').classList.add('hidden');
+    document.getElementById('noteImage').value = '';
+    document.getElementById('noteFormWrap').classList.add('hidden');
+    await loadNotes();
+  }
+});
+
+function openNote(note) {
+  viewingNoteId = note.id;
+  document.getElementById('modalTitle').textContent = note.title || 'Sarlavsiz';
+  document.getElementById('modalDate').textContent = formatDate(note.created_at);
+  const imgEl = document.getElementById('modalImg');
+  if (note.image) { imgEl.src = note.image; imgEl.classList.remove('hidden'); }
+  else imgEl.classList.add('hidden');
+  document.getElementById('modalContent').innerHTML = renderMd(note.content);
+  document.getElementById('noteModal').classList.remove('hidden');
+}
+
+document.getElementById('modalClose').addEventListener('click', () =>
+  document.getElementById('noteModal').classList.add('hidden'));
+document.getElementById('noteModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('noteModal'))
+    document.getElementById('noteModal').classList.add('hidden');
+});
+document.getElementById('deleteNoteBtn').addEventListener('click', async () => {
+  if (!confirm('Bu yozuvni o\'chirmoqchimisiz?')) return;
+  await _supabase.from('notes').delete().eq('id', viewingNoteId);
+  document.getElementById('noteModal').classList.add('hidden');
+  await loadNotes();
+});
+
+// ════════════════════════════════════════════
+// DRAWING CANVAS
+// ════════════════════════════════════════════
+const PALETTE = [
+  '#ec4899','#f9a8d4','#a855f7','#c4b5fd','#3b82f6',
+  '#93c5fd','#10b981','#6ee7b7','#f59e0b','#fcd34d',
+  '#ef4444','#fca5a5','#8b5cf6','#d8b4fe','#06b6d4',
+  '#67e8f9','#84cc16','#bef264','#f97316','#fed7aa',
+  '#ffffff','#f3f4f6','#9ca3af','#4b5563','#1f2937',
+];
+
+function initCanvas() {
+  const palette = document.getElementById('colorPalette');
+  PALETTE.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'color-swatch';
+    btn.style.background = c;
+    btn.title = c;
+    if (c === '#ec4899') btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      state.color = c;
+      document.getElementById('customColor').value = c;
+      setTool('brush');
     });
+    palette.appendChild(btn);
+  });
 
-    // ── Tab switching ──
-    document.querySelectorAll('.dnav').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.dnav').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
-        document.querySelectorAll('.dtab').forEach(t => t.classList.remove('dtab--active'));
-        document.getElementById('tab-' + tab).classList.add('dtab--active');
-      });
+  document.getElementById('customColor').addEventListener('input', e => {
+    state.color = e.target.value;
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    setTool('brush');
+  });
+
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('size-btn--active'));
+      btn.classList.add('size-btn--active');
+      state.size = parseInt(btn.dataset.size);
     });
+  });
 
-    // ── Notes ──
-    async function loadNotes() {
-      const { data, error } = await _supabase
-        .from('notes')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
-      if (!error) { notes = data; renderNotes(); }
+  document.getElementById('toolBrush').addEventListener('click', () => setTool('brush'));
+  document.getElementById('toolEraser').addEventListener('click', () => setTool('eraser'));
+
+  document.getElementById('clearCanvas').addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (state.template) drawTemplate(state.template);
+  });
+
+  document.getElementById('downloadCanvas').addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.download = 'with-mubina-rasm.png';
+    a.href = canvas.toDataURL();
+    a.click();
+  });
+
+  document.querySelectorAll('.tpl-btn[data-tpl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('tpl-btn--active'));
+      btn.classList.add('tpl-btn--active');
+      state.template = btn.dataset.tpl;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawTemplate(state.template);
+    });
+  });
+
+  document.getElementById('clearTemplate').addEventListener('click', () => {
+    state.template = null;
+    document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('tpl-btn--active'));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  });
+
+  setupCanvasDrawing();
+}
+
+const canvas = document.getElementById('drawCanvas');
+const ctx = canvas.getContext('2d');
+const state = { drawing: false, color: '#ec4899', size: 4, tool: 'brush', template: null };
+
+function resizeCanvas() {
+  const wrap = document.querySelector('.canvas-wrap');
+  const w = wrap.clientWidth;
+  const h = Math.min(w * 0.6, 480);
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  canvas.width = w;
+  canvas.height = h;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+  ctx.putImageData(img, 0, 0);
+  if (state.template) drawTemplate(state.template);
+}
+
+window.addEventListener('resize', resizeCanvas);
+// Delay to let layout settle
+setTimeout(resizeCanvas, 200);
+
+function setTool(tool) {
+  state.tool = tool;
+  document.getElementById('toolBrush').classList.toggle('tool-btn--active', tool === 'brush');
+  document.getElementById('toolEraser').classList.toggle('tool-btn--active', tool === 'eraser');
+}
+
+function getPos(e, canvas) {
+  const r = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - r.left, y: src.clientY - r.top };
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  state.drawing = true;
+  const { x, y } = getPos(e, canvas);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+}
+
+function draw(e) {
+  e.preventDefault();
+  if (!state.drawing) return;
+  const { x, y } = getPos(e, canvas);
+  ctx.lineWidth = state.size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = state.tool === 'eraser' ? '#ffffff' : state.color;
+  ctx.globalCompositeOperation = state.tool === 'eraser' ? 'destination-out' : 'source-over';
+  ctx.lineTo(x, y);
+  ctx.stroke();
+}
+
+function endDraw(e) {
+  e.preventDefault();
+  state.drawing = false;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function setupCanvasDrawing() {
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', endDraw, { passive: false });
+}
+
+// Templates (SVG-style drawn with Canvas API)
+function drawTemplate(name) {
+  const w = canvas.width, h = canvas.height;
+  const cx = w / 2, cy = h / 2;
+  ctx.save();
+  ctx.strokeStyle = '#d1d5db';
+  ctx.lineWidth = 2;
+  ctx.fillStyle = 'transparent';
+
+  if (name === 'flower') {
+    const r = Math.min(w, h) * 0.18;
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const px = cx + Math.cos(angle) * r, py = cy + Math.sin(angle) * r;
+      ctx.beginPath();
+      ctx.ellipse(px, py, r * 0.55, r * 0.3, angle, 0, Math.PI * 2);
+      ctx.stroke();
     }
-
-    function renderNotes() {
-      const grid  = document.getElementById('notesGrid');
-      const empty = document.getElementById('notesEmpty');
-      grid.querySelectorAll('.note-card').forEach(el => el.remove());
-
-      if (!notes.length) { empty.classList.remove('hidden'); return; }
-      empty.classList.add('hidden');
-
-      notes.forEach(note => {
-        const card = document.createElement('div');
-        card.className = 'note-card';
-        card.innerHTML = `
-          <div class="note-card__date">${formatDate(note.created_at)}</div>
-          <h3 class="note-card__title">${note.title || 'Sarlavsiz'}</h3>
-          <p class="note-card__preview">${note.content.slice(0, 120)}${note.content.length > 120 ? '...' : ''}</p>
-        `;
-        card.addEventListener('click', () => openNote(note));
-        grid.appendChild(card);
-      });
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.35, 0, Math.PI * 2); ctx.stroke();
+    // Leaves
+    const lr = r * 1.7;
+    for (let i = 0; i < 3; i++) {
+      const a = (i / 3) * Math.PI * 2 + Math.PI / 6;
+      ctx.beginPath();
+      ctx.ellipse(cx + Math.cos(a) * lr, cy + Math.sin(a) * lr, r * 0.6, r * 0.22, a, 0, Math.PI * 2);
+      ctx.stroke();
     }
+  }
 
-    // New note form
-    document.getElementById('newNoteBtn').addEventListener('click', () => {
-      document.getElementById('noteFormWrap').classList.toggle('hidden');
-      document.getElementById('noteContent').focus();
+  if (name === 'butterfly') {
+    const s = Math.min(w, h) * 0.35;
+    // Upper wings
+    ctx.beginPath();
+    ctx.ellipse(cx - s * 0.55, cy - s * 0.35, s * 0.5, s * 0.65, -0.5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(cx + s * 0.55, cy - s * 0.35, s * 0.5, s * 0.65, 0.5, 0, Math.PI * 2);
+    ctx.stroke();
+    // Lower wings
+    ctx.beginPath();
+    ctx.ellipse(cx - s * 0.45, cy + s * 0.3, s * 0.38, s * 0.45, 0.3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(cx + s * 0.45, cy + s * 0.3, s * 0.38, s * 0.45, -0.3, 0, Math.PI * 2);
+    ctx.stroke();
+    // Body
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, s * 0.08, s * 0.55, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    // Antennae
+    ctx.beginPath(); ctx.moveTo(cx, cy - s * 0.55);
+    ctx.quadraticCurveTo(cx - s * 0.3, cy - s * 0.9, cx - s * 0.25, cy - s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - s * 0.55);
+    ctx.quadraticCurveTo(cx + s * 0.3, cy - s * 0.9, cx + s * 0.25, cy - s); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx - s * 0.25, cy - s, 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx + s * 0.25, cy - s, 4, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  if (name === 'mandala') {
+    const rings = [0.08, 0.16, 0.26, 0.38, 0.5];
+    const r = Math.min(w, h) * 0.5;
+    rings.forEach(f => {
+      ctx.beginPath(); ctx.arc(cx, cy, r * f, 0, Math.PI * 2); ctx.stroke();
     });
-
-    document.getElementById('cancelNoteBtn').addEventListener('click', () => {
-      document.getElementById('noteFormWrap').classList.add('hidden');
-      document.getElementById('noteTitle').value = '';
-      document.getElementById('noteContent').value = '';
-    });
-
-    document.getElementById('saveNoteBtn').addEventListener('click', async () => {
-      const content = document.getElementById('noteContent').value.trim();
-      if (!content) return;
-      const title = document.getElementById('noteTitle').value.trim();
-
-      const { error } = await _supabase.from('notes').insert({
-        user_id: currentUser.id, title, content
-      });
-      if (!error) {
-        document.getElementById('noteTitle').value = '';
-        document.getElementById('noteContent').value = '';
-        document.getElementById('noteFormWrap').classList.add('hidden');
-        await loadNotes();
+    // Petals on each ring
+    [8, 12, 16].forEach((petals, ri) => {
+      const pr = r * rings[ri + 1];
+      for (let i = 0; i < petals; i++) {
+        const a = (i / petals) * Math.PI * 2;
+        const px = cx + Math.cos(a) * pr * 0.75, py = cy + Math.sin(a) * pr * 0.75;
+        ctx.beginPath();
+        ctx.ellipse(px, py, pr * 0.15, pr * 0.28, a, 0, Math.PI * 2);
+        ctx.stroke();
       }
     });
-
-    function openNote(note) {
-      viewingNoteId = note.id;
-      document.getElementById('modalTitle').textContent   = note.title || 'Sarlavsiz';
-      document.getElementById('modalDate').textContent    = formatDate(note.created_at);
-      document.getElementById('modalContent').textContent = note.content;
-      document.getElementById('noteModal').classList.remove('hidden');
+    // Spokes
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a) * r * 0.5, cy + Math.sin(a) * r * 0.5);
+      ctx.stroke();
     }
+  }
 
-    document.getElementById('modalClose').addEventListener('click', () => {
-      document.getElementById('noteModal').classList.add('hidden');
+  if (name === 'heart') {
+    const s = Math.min(w, h) * 0.38;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s * 0.6);
+    ctx.bezierCurveTo(cx - s * 1.1, cy, cx - s * 1.1, cy - s * 0.85, cx, cy - s * 0.3);
+    ctx.bezierCurveTo(cx + s * 1.1, cy - s * 0.85, cx + s * 1.1, cy, cx, cy + s * 0.6);
+    ctx.stroke();
+    // Inner small heart
+    const si = s * 0.45;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + si * 0.6);
+    ctx.bezierCurveTo(cx - si * 1.1, cy + si * 0.1, cx - si * 1.1, cy - si * 0.75, cx, cy - si * 0.2);
+    ctx.bezierCurveTo(cx + si * 1.1, cy - si * 0.75, cx + si * 1.1, cy + si * 0.1, cx, cy + si * 0.6);
+    ctx.stroke();
+    // Star points around
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const d = s * 0.9;
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d - s * 0.1, 5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════
+// INSPIRATION ENGINE
+// ════════════════════════════════════════════
+const INSP = {
+  happy: {
+    self:     { e:'🌸', t:'Bugun baxtli bo\'lganingiz sezilayapti — bu sizning yorug\'ligingiz! O\'zingizni shu holda sevib, energiyangizni atrofdagilarga ham yoyib yuboring. Quvonch — yuqumli narsa, va siz bugun birovning kunini ham yorita olasiz.', p:'Daftaringizga yozing: "Bugun meni baxtli qilgan 3 narsa..."' },
+    goals:    { e:'🌟', t:'Baxtli kunlarda maqsadlar yorqinroq ko\'rinadi! Shu ilhom bilan bitta kichik qadam qo\'ying — katta natijalar kichik boshliqlardan iborat. Hozir siz uchun eng muhim maqsad nima?', p:'Bugun 1 ta kichik ish qiling va kechasi uni belgilang!' },
+    hard:     { e:'💫', t:'Baxtli ekanligingizda ham qiyinchiliklarni unutmang — ular sizni shu yerga yetkazdi. Har bir qiyin kun sizni kuchliroq qildi. Bugun shu kuchni his qiling!', p:'O\'tgan qiyinchiliklardan qaysi biri sizni eng ko\'p o\'stirdi?' },
+    creative: { e:'🎨', t:'Baxtli vaqtlarda ijod eng go\'zal mevalarini beradi! Qo\'lingizga qalamni yoki cho\'tka oling — bugungi kayfiyatingizni bo\'yoqlarda ifodalang. Hech qanday qoida yo\'q, faqat his qiling!', p:'Bugun nima chizgingiz yoki yozgingiz kelayapti?' },
+    relation: { e:'💕', t:'Baxtli ekanligingizda atrofingizdagilarga mehr ulashing! Birovga "rahmat" yoki "seni sevaman" deyish — bu katta sovg\'a. Kim sizga bugun tabassum qildi?', p:'Bugun sizga muhim bo\'lgan odamga qisqa xabar yozing.' },
+  },
+  sad: {
+    self:     { e:'🫂', t:'Tushkun bo\'lish — insoniy. O\'zingizga nisbatan mehribon bo\'ling, xuddi yaqin do\'stingizga muomala qilganday. Bu his o\'tadi, lekin siz qolasiz — va siz kuchsiz emassiz.', p:'O\'zingizga: "Hozir meni nima bezovta qilyapti?" — deb yozing.' },
+    goals:    { e:'🌱', t:'Hozir maqsadlar uzoq ko\'rinishi mumkin — bu normal. Ekinlar yomg\'irda ham o\'sadi. Faqat bir kichik qadam: bugun nimadir o\'qing yoki biror yangi narsa o\'rganing.', p:'1 ta kichik, oson bajariladigan maqsad yozing.' },
+    hard:     { e:'🕊️', t:'Qiyin kunlar abadiy emas. Hozir his qilayotgan og\'irlik — o\'tib ketadi. O\'zingizga vaqt bering, yig\'lasangiz yig\'lang, lekin bilgilki: tonglar albatta keladi.', p:'Hozir o\'zingizga nima kerak? Yozing.' },
+    creative: { e:'🎵', t:'Ba\'zan eng chiroyli ijod — og\'riqdan tug\'iladi. Hissiyotlaringizni qog\'ozga to\'king: she\'r, rasm, yoki faqat so\'zlar. Baholash kerak emas — faqat to\'kib soling.', p:'Hozirgi his-tuyg\'ularingizni ranglarda ifodalasangiz qanday rang bo\'lardi?' },
+    relation: { e:'💙', t:'Yolg\'iz his qilsangiz — bu his haqiqiy, lekin haqiqat emas. Birov sizni o\'ylayapti. Bugun bitta odamga qo\'ng\'iroq qiling yoki xabar yozing — hatto kichkina narsa bo\'lsa ham.', p:'Kimga xabar yozishni uzoq vaqt kechiktirdingiz?' },
+  },
+  strong: {
+    self:     { e:'🦋', t:'Bu kuchni his qilyapsiz — demak u ichingizda bor edi! Siz o\'z hayotingizning qahramonisiz. Bugun shu kuchni biron muhim ishga yo\'naltiring.', p:'Bugun o\'zingizdan faxr his qilgan narsani yozing.' },
+    goals:    { e:'🚀', t:'Kuchli paytlarda maqsadlarga intiling! Hozir siz uchun imkonsiz narsa yo\'q. Katta orzuni kichik qadamlarga bo\'ling va birinchisini bugun boshlang.', p:'Eng katta orzuyingiz nima? Uni 3 qadamga bo\'ling.' },
+    hard:     { e:'⚡', t:'Qiyinchiliklarga qarshi turishga kuch bor sizda — bu isbotlangan! Hozir siz oldingizda turgan eng qiyin narsa nima? Uni bu kuch bilan yeching.', p:'Eng uzoq muddatdan beri hal etmagan muammoingizni yozing.' },
+    creative: { e:'🔥', t:'Kuchli paytlarda ijodiy energiya maksimal darajada! Hozir biron yangi narsa yarating — rasm, she\'r, musiqa, yoki hatto biron fikr. Bu lahzani qo\'ldan bermang!', p:'Qaysi ijodiy loyihani uzoq vaqt boshlamasdan yurgan edingiz?' },
+    relation: { e:'🌺', t:'Kuchli bo\'lganingizda atrofingizdagilarga tayanch bo\'ling. Kimnidir ko\'taring, kimgadir ilhom bering. Kuch — ulashilganda ko\'payadi.', p:'Kim hozir sizning qo\'llab-quvvatlashingizga muhtoj?' },
+  },
+  anxious: {
+    self:     { e:'🌿', t:'Xavotir — e\'tibor belgisi. Siz muhim narsalarga qayg\'urayapsiz. Lekin nafas oling: hozir, shu daqiqada, siz xavfsiz. Asta-sekin, bir qadam.', p:'3 marta chuqur nafas oling, so\'ng: "Hozir meni nima xavotirlantiradi?" deb yozing.' },
+    goals:    { e:'🌈', t:'Maqsadlar ba\'zan haddan tashqari katta ko\'rinishi mumkin. Ularni kichraytiring. Bugun faqat bitta, eng kichik qadamni qo\'ying. Boshqa hech narsa kerak emas.', p:'Eng kichik, 5 daqiqada bajara oladigan maqsad-qadamni yozing.' },
+    hard:     { e:'☁️', t:'Xavotirli paytlarda o\'zingizga nisbatan yumshoq bo\'ling. Siz hamma narsani bir vaqtda hal qilishingiz shart emas. Bir narsa — bir vaqtda.', p:'Xavotirlarni ro\'yxat qiling, so\'ng qaysi biri bugun muhimini belgilang.' },
+    creative: { e:'🎨', t:'Ijod — xavotirning eng yaxshi dori! Qo\'lingizga biror narsa oling: bo\'yoq, qalam, yoki klaviatura. Hissiyotlaringizni chiqarib tashlang.', p:'Hozirgi xavotiringizni rasm yoki so\'z bilan ifodalashga urining.' },
+    relation: { e:'🤗', t:'Munosabatlardagi xavotir — ko\'pincha yetarlicha muhabbat borligidan. Samimiy gapirish ko\'p narsani yechadi. Kimga biror narsa aytmoqchi edingiz?', p:'Ichingizda saqlab yurgan narsani yozing — aytishingiz shart emas.' },
+  },
+  searching: {
+    self:     { e:'🔍', t:'Izlash — o\'sishning belgisi! Siz qanday odam bo\'lmoqchiligi uchun javob qidiryapsiz — bu juda katta ish. Javoblar sekin keladi, lekin siz to\'g\'ri yo\'ldasiz.', p:'"Men qanday odam bo\'lmoqchiman?" — bunga javob yozing.' },
+    goals:    { e:'🧭', t:'Maqsadsiz his qilayotgan bo\'lsangiz — bu normal. Ko\'p odamlar shu holatda. Kichik qadamdan boshlang: bugun qaysi bir yangi narsa o\'rganing va qanday his qilganingizni kuzating.', p:'Hayotingizda nima sizni haqiqatan qiziqtiradi? Ro\'yxat tuzing.' },
+    hard:     { e:'🌙', t:'Qidirish — jasorat. Ko\'pchilik qidirmasdan yuradi. Qiyinchilik ichida ham ma\'no bor — balki u ma\'no sizni shu yo\'lga olib chiqyapti.', p:'Qaysi qiyinchilik sizni eng ko\'p o\'stirdi? Uning ma\'nosini toping.' },
+    creative: { e:'💡', t:'Ijod — javob topishning eng yaxshi yo\'llaridan biri. Qog\'ozga chiqarib tashlang — savollar, fikrlar, rasmlar. Hech qanday tizim kerak emas.', p:'Hozir miyangizda nima bor? Hamma narsani yozing — tartibsiz bo\'lsa ham.' },
+    relation: { e:'🌸', t:'Ba\'zan biz o\'zimizni munosabatlarda yo\'qotib qo\'yamiz. Kim siz bo\'lmasangiz ham? Qaysi munosabatlarda o\'zingiz emassiz? Bu savollar muhim.', p:'"Odamlar bilan bo\'lganda o\'zim bo\'layapmanmi?" — deb yozing.' },
+  },
+};
+
+let inspState = { mood: null, topic: null };
+
+function initInspiration() {
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      inspState.mood = btn.dataset.mood;
+      document.getElementById('inspStep1').classList.add('hidden');
+      document.getElementById('inspStep2').classList.remove('hidden');
+      document.getElementById('inspResponse').classList.add('hidden');
     });
+  });
 
-    document.getElementById('noteModal').addEventListener('click', e => {
-      if (e.target === document.getElementById('noteModal'))
-        document.getElementById('noteModal').classList.add('hidden');
+  document.querySelectorAll('.topic-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      inspState.topic = btn.dataset.topic;
+      showInspiration();
     });
+  });
 
-    document.getElementById('deleteNoteBtn').addEventListener('click', async () => {
-      if (!confirm('Bu yozuvni o\'chirmoqchimisiz?')) return;
-      await _supabase.from('notes').delete().eq('id', viewingNoteId);
-      document.getElementById('noteModal').classList.add('hidden');
-      await loadNotes();
-    });
+  document.getElementById('inspAgain').addEventListener('click', () => {
+    inspState.mood = null; inspState.topic = null;
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('inspStep1').classList.remove('hidden');
+    document.getElementById('inspStep2').classList.add('hidden');
+    document.getElementById('inspResponse').classList.add('hidden');
+  });
 
-    // ── Challenges ──
-    async function loadChallenges() {
-      const { data } = await _supabase
-        .from('challenge_completions')
-        .select('day')
-        .eq('user_id', currentUser.id);
-      completedDays = new Set((data || []).map(r => r.day));
-      renderChallenges();
-    }
+  document.getElementById('saveToDiary').addEventListener('click', () => {
+    const r = INSP[inspState.mood]?.[inspState.topic];
+    if (!r) return;
+    // Pre-fill note form and switch tab
+    document.querySelector('.dnav[data-tab="notes"]').click();
+    document.getElementById('noteFormWrap').classList.remove('hidden');
+    document.getElementById('noteTitle').value = r.e + ' Ilhom — ' + new Date().toLocaleDateString('uz-UZ');
+    document.getElementById('noteContent').value = r.t + '\n\n' + r.p;
+    document.getElementById('noteContent').focus();
+  });
+}
 
-    function renderChallenges() {
-      const count = completedDays.size;
-      document.getElementById('completedCount').textContent = count;
-      document.getElementById('progressFill').style.width = (count / 30 * 100) + '%';
+function showInspiration() {
+  const r = INSP[inspState.mood]?.[inspState.topic];
+  if (!r) return;
+  document.getElementById('inspStep2').classList.add('hidden');
+  const resp = document.getElementById('inspResponse');
+  resp.classList.remove('hidden');
+  document.getElementById('inspEmoji').textContent = r.e;
+  document.getElementById('inspText').textContent = r.t;
+  document.getElementById('inspPrompt').textContent = '💭 ' + r.p;
+}
 
-      // Today's challenge = first uncompleted day
-      const todayChallenge = CHALLENGES.find(c => !completedDays.has(c.day)) || CHALLENGES[29];
-      const todayEl = document.getElementById('chToday');
-      todayEl.innerHTML = `
-        <div class="ch-today-label">Bugungi vazifa</div>
-        <div class="ch-today-card">
-          <span class="ch-today-icon">${todayChallenge.icon}</span>
-          <div class="ch-today-info">
-            <h3>Kun ${todayChallenge.day}: ${todayChallenge.title}</h3>
-            <p>${todayChallenge.desc}</p>
-          </div>
-          <button class="ch-today-btn ${completedDays.has(todayChallenge.day) ? 'done' : ''}"
-            data-day="${todayChallenge.day}">
-            ${completedDays.has(todayChallenge.day) ? '✅ Bajarildi' : 'Bajardim! ✓'}
-          </button>
-        </div>`;
+// ════════════════════════════════════════════
+// CHALLENGE (sequential)
+// ════════════════════════════════════════════
+async function loadChallenges() {
+  const { data } = await _supabase
+    .from('challenge_completions').select('day').eq('user_id', currentUser.id);
+  completedDays = new Set((data || []).map(r => r.day));
+  renderChallenges();
+}
 
-      todayEl.querySelector('.ch-today-btn').addEventListener('click', () =>
-        toggleChallenge(todayChallenge.day));
+function renderChallenges() {
+  const count = completedDays.size;
+  document.getElementById('completedCount').textContent = count;
+  document.getElementById('progressFill').style.width = (count / 30 * 100) + '%';
 
-      // Grid
-      const grid = document.getElementById('chGrid');
-      grid.innerHTML = '';
-      CHALLENGES.forEach(ch => {
-        const done = completedDays.has(ch.day);
-        const isCurrent = ch.day === todayChallenge.day;
-        const card = document.createElement('div');
-        card.className = `ch-card ${done ? 'ch-card--done' : ''} ${isCurrent ? 'ch-card--current' : ''}`;
-        card.innerHTML = `
-          <span class="ch-card__icon">${ch.icon}</span>
-          <span class="ch-card__day">Kun ${ch.day}</span>
-          <span class="ch-card__name">${ch.title}</span>
-          ${done ? '<span class="ch-card__check">✓</span>' : ''}
-        `;
-        card.addEventListener('click', () => toggleChallenge(ch.day));
-        grid.appendChild(card);
-      });
-    }
+  const currentDay = CHALLENGES.find(c => !completedDays.has(c.day)) || CHALLENGES[29];
 
-    async function toggleChallenge(day) {
-      if (completedDays.has(day)) {
-        await _supabase.from('challenge_completions')
-          .delete().eq('user_id', currentUser.id).eq('day', day);
-        completedDays.delete(day);
-      } else {
-        await _supabase.from('challenge_completions')
-          .insert({ user_id: currentUser.id, day });
-        completedDays.add(day);
-      }
-      renderChallenges();
-    }
+  const todayEl = document.getElementById('chToday');
+  todayEl.innerHTML = `
+    <div class="ch-today-label">Bugungi vazifa — Kun ${currentDay.day}</div>
+    <div class="ch-today-card">
+      <span class="ch-today-icon">${currentDay.icon}</span>
+      <div class="ch-today-info">
+        <h3>${currentDay.title}</h3>
+        <p>${currentDay.desc}</p>
+      </div>
+      <button class="ch-today-btn ${completedDays.has(currentDay.day) ? 'done' : ''}"
+        data-day="${currentDay.day}">
+        ${completedDays.has(currentDay.day) ? '✅ Bajarildi' : 'Bajardim ✓'}
+      </button>
+    </div>`;
+  todayEl.querySelector('.ch-today-btn').addEventListener('click', () =>
+    toggleChallenge(currentDay.day));
 
-    // ── Helpers ──
-    function formatDate(iso) {
-      return new Date(iso).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
+  const grid = document.getElementById('chGrid');
+  grid.innerHTML = '';
+  CHALLENGES.forEach(ch => {
+    const done = completedDays.has(ch.day);
+    const isCurrent = ch.day === currentDay.day;
+    // A day is locked if previous day not done AND not already completed
+    const isLocked = !done && !isCurrent;
+    const card = document.createElement('div');
+    card.className = `ch-card ${done ? 'ch-card--done' : ''} ${isCurrent ? 'ch-card--current' : ''} ${isLocked ? 'ch-card--locked' : ''}`;
+    card.innerHTML = `
+      <span class="ch-card__icon">${isLocked ? '🔒' : ch.icon}</span>
+      <span class="ch-card__day">Kun ${ch.day}</span>
+      <span class="ch-card__name">${ch.title}</span>
+      ${done ? '<span class="ch-card__check">✓</span>' : ''}
+    `;
+    if (!isLocked) card.addEventListener('click', () => toggleChallenge(ch.day));
+    grid.appendChild(card);
+  });
+}
 
-    init();
+async function toggleChallenge(day) {
+  if (completedDays.has(day)) {
+    await _supabase.from('challenge_completions')
+      .delete().eq('user_id', currentUser.id).eq('day', day);
+    completedDays.delete(day);
+  } else {
+    await _supabase.from('challenge_completions')
+      .insert({ user_id: currentUser.id, day });
+    completedDays.add(day);
+  }
+  renderChallenges();
+}
+
+// ════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('uz-UZ', { year:'numeric', month:'long', day:'numeric' });
+}
+
+function stripMd(t) {
+  return t.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
+}
+
+function renderMd(t) {
+  return t
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>');
+}
+
+init();
   </script>
 </body>
 </html>
