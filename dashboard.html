@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20260613" />
+  <link rel="stylesheet" href="style.css?v=20260613b" />
 </head>
 <body class="dash-body">
 
@@ -329,8 +329,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260613"></script>
-  <script src="bubbles.js?v=20260613"></script>
+  <script src="app.js?v=20260613b"></script>
+  <script src="bubbles.js?v=20260613b"></script>
   <script>
 // ════════════════════════════════════════════
 // STATE
@@ -406,11 +406,67 @@ document.querySelectorAll('.dnav').forEach(btn => {
 // ════════════════════════════════════════════
 function addHeaderDeco() {
   if (userGender === 'girl') {
+    createGirlSky();
     launchFlightAnimation('✈️', 'girl');
   } else {
     createGalaxy();
     launchFlightAnimation('🚀', 'boy');
   }
+}
+
+function createGirlSky() {
+  const sky = document.createElement('div');
+  sky.className = 'girl-sky';
+
+  // Sun
+  const sun = document.createElement('div');
+  sun.className = 'gsky-sun';
+  sky.appendChild(sun);
+
+  // Drifting clouds
+  const cloudSpots = [
+    { top: '12%', dur: 70, delay: 0,   scale: 1   },
+    { top: '22%', dur: 95, delay: -30, scale: 0.7 },
+    { top: '34%', dur: 80, delay: -55, scale: 1.2 },
+    { top: '48%', dur: 110,delay: -20, scale: 0.85},
+    { top: '60%', dur: 90, delay: -70, scale: 1.05},
+  ];
+  cloudSpots.forEach(c => {
+    const cl = document.createElement('div');
+    cl.className = 'gsky-cloud';
+    cl.style.cssText = `top:${c.top};transform:scale(${c.scale});animation-duration:${c.dur}s;animation-delay:${c.delay}s`;
+    sky.appendChild(cl);
+  });
+
+  // Flying birds (gull "m" shapes)
+  const birdSvg = '<svg viewBox="0 0 24 12"><path d="M1 9 Q6 1 12 7 Q18 1 23 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const birdSpots = [
+    { top: '16%', dur: 26, delay: 0   },
+    { top: '20%', dur: 26, delay: -2  },
+    { top: '24%', dur: 26, delay: -4  },
+    { top: '40%', dur: 34, delay: -12 },
+    { top: '44%', dur: 34, delay: -14 },
+  ];
+  birdSpots.forEach(b => {
+    const bird = document.createElement('div');
+    bird.className = 'gsky-bird';
+    bird.innerHTML = birdSvg;
+    bird.style.cssText = `top:${b.top};animation-duration:${b.dur}s;animation-delay:${b.delay}s`;
+    sky.appendChild(bird);
+  });
+
+  // Rain drops (hidden until rainy)
+  for (let i = 0; i < 70; i++) {
+    const drop = document.createElement('span');
+    drop.className = 'gsky-drop';
+    drop.style.cssText = `left:${Math.random()*100}%;animation-duration:${0.5+Math.random()*0.5}s;animation-delay:${Math.random()*2}s`;
+    sky.appendChild(drop);
+  }
+
+  document.body.appendChild(sky);
+
+  // After 3 minutes → turn into a rainy, gloomy sky
+  setTimeout(() => sky.classList.add('rainy'), 3 * 60 * 1000);
 }
 
 function createGalaxy() {

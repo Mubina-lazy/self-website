@@ -1199,6 +1199,91 @@ body {
   box-shadow: 0 2px 12px rgba(236,72,153,0.15);
 }
 
+/* ════ GIRL SKY SCENE ════ */
+/* Hide soap bubbles in girl theme (sky scene replaces them) */
+.theme-girl .floating-bubble { display: none !important; }
+
+.girl-sky {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; overflow: hidden;
+  transition: background 3s ease;
+}
+/* Gloomy tint when rainy */
+.girl-sky.rainy {
+  background: linear-gradient(180deg, rgba(90,100,120,0.30), rgba(70,80,105,0.42));
+}
+
+/* Sun */
+.gsky-sun {
+  position: absolute; top: 7%; right: 9%;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #fff7cc, #ffd23f 60%, #ffb703);
+  box-shadow: 0 0 50px 16px rgba(255,210,63,0.5), 0 0 90px 30px rgba(255,183,3,0.25);
+  animation: gsky-sun-pulse 6s ease-in-out infinite;
+  transition: opacity 3s ease, transform 3s ease;
+}
+@keyframes gsky-sun-pulse {
+  0%,100% { box-shadow: 0 0 50px 16px rgba(255,210,63,0.5), 0 0 90px 30px rgba(255,183,3,0.25); }
+  50%     { box-shadow: 0 0 70px 24px rgba(255,210,63,0.65),0 0 120px 45px rgba(255,183,3,0.35); }
+}
+.girl-sky.rainy .gsky-sun { opacity: 0; transform: translateY(-40px); }
+
+/* Clouds */
+.gsky-cloud {
+  position: absolute; left: -160px;
+  width: 100px; height: 34px; background: #fff; border-radius: 100px;
+  opacity: 0.92; filter: drop-shadow(0 6px 10px rgba(120,120,150,0.12));
+  animation-name: gsky-drift; animation-timing-function: linear; animation-iteration-count: infinite;
+  transition: background 3s ease, opacity 3s ease;
+}
+.gsky-cloud::before, .gsky-cloud::after {
+  content: ''; position: absolute; background: #fff; border-radius: 50%;
+  transition: background 3s ease;
+}
+.gsky-cloud::before { width: 50px; height: 50px; top: -22px; left: 16px; }
+.gsky-cloud::after  { width: 36px; height: 36px; top: -14px; right: 16px; }
+@keyframes gsky-drift {
+  from { left: -160px; }
+  to   { left: calc(100% + 160px); }
+}
+/* Rainy → grey, heavier clouds */
+.girl-sky.rainy .gsky-cloud,
+.girl-sky.rainy .gsky-cloud::before,
+.girl-sky.rainy .gsky-cloud::after { background: #8b95a3; }
+.girl-sky.rainy .gsky-cloud { opacity: 0.96; }
+
+/* Birds */
+.gsky-bird {
+  position: absolute; left: -40px; width: 24px; height: 12px;
+  color: rgba(80,70,90,0.6);
+  animation-name: gsky-fly; animation-timing-function: linear; animation-iteration-count: infinite;
+  transition: opacity 2.5s ease;
+}
+.gsky-bird svg { width: 100%; height: 100%; display: block; animation: gsky-flap 0.5s ease-in-out infinite; }
+@keyframes gsky-fly {
+  0%   { left: -40px; transform: translateY(0); }
+  50%  { transform: translateY(-22px); }
+  100% { left: calc(100% + 40px); transform: translateY(0); }
+}
+@keyframes gsky-flap {
+  0%,100% { transform: scaleY(1); }
+  50%     { transform: scaleY(0.6); }
+}
+/* Birds fly away when it turns rainy */
+.girl-sky.rainy .gsky-bird { opacity: 0; }
+
+/* Rain */
+.gsky-drop {
+  position: absolute; top: -24px; width: 2px; height: 18px; border-radius: 2px;
+  background: linear-gradient(to bottom, rgba(174,194,224,0), rgba(174,194,224,0.85));
+  opacity: 0; animation-name: gsky-rain; animation-timing-function: linear; animation-iteration-count: infinite;
+}
+.girl-sky.rainy .gsky-drop { opacity: 1; }
+@keyframes gsky-rain {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(108vh); }
+}
+
 /* ════════════════════════════════
    BOY THEME
    ════════════════════════════════ */
