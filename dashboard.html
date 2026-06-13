@@ -308,6 +308,26 @@
     </div>
   </div>
 
+  <!-- Chat credit modal -->
+  <div class="modal-overlay hidden" id="creditModal">
+    <div class="modal" style="max-width:400px;text-align:center">
+      <div class="modal-head" style="justify-content:center;border:none;padding-bottom:0">
+        <h3 style="font-size:1.3rem">💬 Xabar kreditlari</h3>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0 1.2rem">Xabar yuborish uchun coin sarflang</p>
+      <div style="display:flex;flex-direction:column;gap:0.7rem;margin-bottom:1.2rem">
+        <button class="btn btn--primary" id="buy15Btn" style="font-size:1rem;padding:0.8rem">
+          💰 1 coin → 15 ta xabar
+        </button>
+        <button class="btn btn--outline" id="buy30Btn" style="font-size:1rem;padding:0.8rem">
+          💰 2 coin → 30 ta xabar
+        </button>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-muted)" id="creditModalBalance"></p>
+      <button class="btn btn--ghost" id="creditModalClose" style="margin-top:0.5rem">Yopish</button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script src="bubbles.js"></script>
@@ -515,6 +535,54 @@ function updateCoinDisplay(ping) {
   el.textContent = '💰 $' + getCoins();
   if (ping) { el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping'); }
 }
+
+// ── Chat credits ──
+const MSGS_PER_COIN = 15;
+function getCredits() { return parseInt(localStorage.getItem('chat_credits_' + currentUser.id) || '0'); }
+function setCredits(n) { localStorage.setItem('chat_credits_' + currentUser.id, Math.max(0, n)); }
+function updateCreditDisplay() {
+  const credits = getCredits();
+  const btn = document.getElementById('chatSendBtn');
+  if (!isAdmin && credits === 0) {
+    btn.title = 'Kreditlar tugagan — coin sarflang';
+  } else {
+    btn.title = isAdmin ? 'Yuborish' : `Qolgan xabarlar: ${credits}`;
+  }
+}
+
+function openCreditModal() {
+  const bal = getCoins();
+  document.getElementById('creditModalBalance').textContent = `Sizda: ${bal} coin, ${getCredits()} xabar krediti`;
+  document.getElementById('buy15Btn').disabled = bal < 1;
+  document.getElementById('buy30Btn').disabled = bal < 2;
+  document.getElementById('creditModal').classList.remove('hidden');
+}
+
+document.getElementById('creditModalClose').addEventListener('click', () => {
+  document.getElementById('creditModal').classList.add('hidden');
+});
+document.getElementById('creditModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('creditModal'))
+    document.getElementById('creditModal').classList.add('hidden');
+});
+document.getElementById('buy15Btn').addEventListener('click', () => {
+  if (getCoins() < 1) return;
+  localStorage.setItem('coins_' + currentUser.id, getCoins() - 1);
+  setCredits(getCredits() + 15);
+  updateCoinDisplay(false);
+  updateCreditDisplay();
+  document.getElementById('creditModalBalance').textContent =
+    `Sizda: ${getCoins()} coin, ${getCredits()} xabar krediti`;
+  document.getElementById('creditModal').classList.add('hidden');
+});
+document.getElementById('buy30Btn').addEventListener('click', () => {
+  if (getCoins() < 2) return;
+  localStorage.setItem('coins_' + currentUser.id, getCoins() - 2);
+  setCredits(getCredits() + 30);
+  updateCoinDisplay(false);
+  updateCreditDisplay();
+  document.getElementById('creditModal').classList.add('hidden');
+});
 
 function showCoinBurst() {
   const el = document.createElement('div');
@@ -1389,8 +1457,16 @@ async function initChat() {
   } else {
     chatThreadUserId = currentUser.id;
     selectedThreadId = currentUser.id;
-    const uname = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
     document.getElementById('chatMainName').textContent = '💌 Mubina';
+    updateCreditDisplay();
+    // Show credit hint below input
+    if (getCredits() === 0) {
+      const hint = document.getElementById('chatInputRow');
+      hint.insertAdjacentHTML('beforebegin',
+        `<div id="creditHint" style="font-size:0.78rem;color:var(--text-muted);padding:0.3rem 1rem;text-align:center">
+          💬 Xabar yuborish uchun challenge bajaring va coin yig'ing → <button onclick="openCreditModal()" style="background:none;border:none;color:var(--pink-deep);font-weight:700;cursor:pointer;font-size:0.78rem">Coin sarflash →</button>
+        </div>`);
+    }
     await loadChatMessages(currentUser.id);
     subscribeChat(currentUser.id);
   }
@@ -1557,6 +1633,14 @@ document.getElementById('chatImgRemove').addEventListener('click', () => {
 
 async function sendChatMessage(msg) {
   if (!selectedThreadId) return;
+
+  // Credit check (skip for admin)
+  if (!isAdmin) {
+    if (getCredits() <= 0) { openCreditModal(); return; }
+    setCredits(getCredits() - 1);
+    updateCreditDisplay();
+  }
+
   const userName = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
   const { error } = await _supabase.from('chat_messages').insert({
     thread_user_id: selectedThreadId,
@@ -1566,6 +1650,8 @@ async function sendChatMessage(msg) {
     is_admin: isAdmin
   });
   if (error) {
+    // Refund credit on failure
+    if (!isAdmin) setCredits(getCredits() + 1);
     console.error('Chat xato:', error);
     showChatError('Xabar yuborilmadi: ' + error.message);
   }
