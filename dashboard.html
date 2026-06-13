@@ -170,9 +170,13 @@
               <div class="insp-card__text" id="inspText"></div>
               <div class="insp-card__prompt" id="inspPrompt"></div>
             </div>
+            <div class="insp-feedback">
+              <button class="feedback-btn feedback-btn--like" id="likeBtn">❤️ Yoqdi</button>
+              <button class="feedback-btn feedback-btn--dislike" id="dislikeBtn">👎 Boshqasi</button>
+            </div>
             <div class="insp-actions">
               <button class="btn btn--primary" id="saveToDiary">📓 Daftarimga yozish</button>
-              <button class="btn btn--ghost" id="inspAgain">🔄 Yana bir bor</button>
+              <button class="btn btn--ghost" id="inspAgain">← Qayta boshlash</button>
             </div>
           </div>
         </div>
@@ -252,6 +256,8 @@ document.querySelectorAll('.dnav').forEach(btn => {
     btn.classList.add('active');
     document.querySelectorAll('.dtab').forEach(t => t.classList.remove('dtab--active'));
     document.getElementById('tab-' + btn.dataset.tab).classList.add('dtab--active');
+    // Init canvas when draw tab opened
+    if (btn.dataset.tab === 'draw') setTimeout(resizeCanvas, 50);
   });
 });
 
@@ -472,19 +478,22 @@ const state = { drawing: false, color: '#ec4899', size: 4, tool: 'brush', templa
 function resizeCanvas() {
   const wrap = document.querySelector('.canvas-wrap');
   const w = wrap.clientWidth;
-  const h = Math.min(w * 0.6, 480);
-  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  canvas.width = w;
-  canvas.height = h;
+  if (!w) return; // tab hidden
+  const h = Math.min(w * 0.65, 500);
+  // Save current drawing to temp canvas
+  const tmp = document.createElement('canvas');
+  tmp.width = canvas.width; tmp.height = canvas.height;
+  tmp.getContext('2d').drawImage(canvas, 0, 0);
+  canvas.width = w; canvas.height = h;
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, w, h);
-  ctx.putImageData(img, 0, 0);
+  if (tmp.width > 0) ctx.drawImage(tmp, 0, 0);
   if (state.template) drawTemplate(state.template);
 }
 
-window.addEventListener('resize', resizeCanvas);
-// Delay to let layout settle
-setTimeout(resizeCanvas, 200);
+window.addEventListener('resize', () => {
+  if (document.getElementById('tab-draw').classList.contains('dtab--active')) resizeCanvas();
+});
 
 function setTool(tool) {
   state.tool = tool;
@@ -648,47 +657,9 @@ function drawTemplate(name) {
 }
 
 // ════════════════════════════════════════════
-// INSPIRATION ENGINE
+// INSPIRATION ENGINE (random pool + like/dislike)
 // ════════════════════════════════════════════
-const INSP = {
-  happy: {
-    self:     { e:'🌸', t:'Bugun baxtli bo\'lganingiz sezilayapti — bu sizning yorug\'ligingiz! O\'zingizni shu holda sevib, energiyangizni atrofdagilarga ham yoyib yuboring. Quvonch — yuqumli narsa, va siz bugun birovning kunini ham yorita olasiz.', p:'Daftaringizga yozing: "Bugun meni baxtli qilgan 3 narsa..."' },
-    goals:    { e:'🌟', t:'Baxtli kunlarda maqsadlar yorqinroq ko\'rinadi! Shu ilhom bilan bitta kichik qadam qo\'ying — katta natijalar kichik boshliqlardan iborat. Hozir siz uchun eng muhim maqsad nima?', p:'Bugun 1 ta kichik ish qiling va kechasi uni belgilang!' },
-    hard:     { e:'💫', t:'Baxtli ekanligingizda ham qiyinchiliklarni unutmang — ular sizni shu yerga yetkazdi. Har bir qiyin kun sizni kuchliroq qildi. Bugun shu kuchni his qiling!', p:'O\'tgan qiyinchiliklardan qaysi biri sizni eng ko\'p o\'stirdi?' },
-    creative: { e:'🎨', t:'Baxtli vaqtlarda ijod eng go\'zal mevalarini beradi! Qo\'lingizga qalamni yoki cho\'tka oling — bugungi kayfiyatingizni bo\'yoqlarda ifodalang. Hech qanday qoida yo\'q, faqat his qiling!', p:'Bugun nima chizgingiz yoki yozgingiz kelayapti?' },
-    relation: { e:'💕', t:'Baxtli ekanligingizda atrofingizdagilarga mehr ulashing! Birovga "rahmat" yoki "seni sevaman" deyish — bu katta sovg\'a. Kim sizga bugun tabassum qildi?', p:'Bugun sizga muhim bo\'lgan odamga qisqa xabar yozing.' },
-  },
-  sad: {
-    self:     { e:'🫂', t:'Tushkun bo\'lish — insoniy. O\'zingizga nisbatan mehribon bo\'ling, xuddi yaqin do\'stingizga muomala qilganday. Bu his o\'tadi, lekin siz qolasiz — va siz kuchsiz emassiz.', p:'O\'zingizga: "Hozir meni nima bezovta qilyapti?" — deb yozing.' },
-    goals:    { e:'🌱', t:'Hozir maqsadlar uzoq ko\'rinishi mumkin — bu normal. Ekinlar yomg\'irda ham o\'sadi. Faqat bir kichik qadam: bugun nimadir o\'qing yoki biror yangi narsa o\'rganing.', p:'1 ta kichik, oson bajariladigan maqsad yozing.' },
-    hard:     { e:'🕊️', t:'Qiyin kunlar abadiy emas. Hozir his qilayotgan og\'irlik — o\'tib ketadi. O\'zingizga vaqt bering, yig\'lasangiz yig\'lang, lekin bilgilki: tonglar albatta keladi.', p:'Hozir o\'zingizga nima kerak? Yozing.' },
-    creative: { e:'🎵', t:'Ba\'zan eng chiroyli ijod — og\'riqdan tug\'iladi. Hissiyotlaringizni qog\'ozga to\'king: she\'r, rasm, yoki faqat so\'zlar. Baholash kerak emas — faqat to\'kib soling.', p:'Hozirgi his-tuyg\'ularingizni ranglarda ifodalasangiz qanday rang bo\'lardi?' },
-    relation: { e:'💙', t:'Yolg\'iz his qilsangiz — bu his haqiqiy, lekin haqiqat emas. Birov sizni o\'ylayapti. Bugun bitta odamga qo\'ng\'iroq qiling yoki xabar yozing — hatto kichkina narsa bo\'lsa ham.', p:'Kimga xabar yozishni uzoq vaqt kechiktirdingiz?' },
-  },
-  strong: {
-    self:     { e:'🦋', t:'Bu kuchni his qilyapsiz — demak u ichingizda bor edi! Siz o\'z hayotingizning qahramonisiz. Bugun shu kuchni biron muhim ishga yo\'naltiring.', p:'Bugun o\'zingizdan faxr his qilgan narsani yozing.' },
-    goals:    { e:'🚀', t:'Kuchli paytlarda maqsadlarga intiling! Hozir siz uchun imkonsiz narsa yo\'q. Katta orzuni kichik qadamlarga bo\'ling va birinchisini bugun boshlang.', p:'Eng katta orzuyingiz nima? Uni 3 qadamga bo\'ling.' },
-    hard:     { e:'⚡', t:'Qiyinchiliklarga qarshi turishga kuch bor sizda — bu isbotlangan! Hozir siz oldingizda turgan eng qiyin narsa nima? Uni bu kuch bilan yeching.', p:'Eng uzoq muddatdan beri hal etmagan muammoingizni yozing.' },
-    creative: { e:'🔥', t:'Kuchli paytlarda ijodiy energiya maksimal darajada! Hozir biron yangi narsa yarating — rasm, she\'r, musiqa, yoki hatto biron fikr. Bu lahzani qo\'ldan bermang!', p:'Qaysi ijodiy loyihani uzoq vaqt boshlamasdan yurgan edingiz?' },
-    relation: { e:'🌺', t:'Kuchli bo\'lganingizda atrofingizdagilarga tayanch bo\'ling. Kimnidir ko\'taring, kimgadir ilhom bering. Kuch — ulashilganda ko\'payadi.', p:'Kim hozir sizning qo\'llab-quvvatlashingizga muhtoj?' },
-  },
-  anxious: {
-    self:     { e:'🌿', t:'Xavotir — e\'tibor belgisi. Siz muhim narsalarga qayg\'urayapsiz. Lekin nafas oling: hozir, shu daqiqada, siz xavfsiz. Asta-sekin, bir qadam.', p:'3 marta chuqur nafas oling, so\'ng: "Hozir meni nima xavotirlantiradi?" deb yozing.' },
-    goals:    { e:'🌈', t:'Maqsadlar ba\'zan haddan tashqari katta ko\'rinishi mumkin. Ularni kichraytiring. Bugun faqat bitta, eng kichik qadamni qo\'ying. Boshqa hech narsa kerak emas.', p:'Eng kichik, 5 daqiqada bajara oladigan maqsad-qadamni yozing.' },
-    hard:     { e:'☁️', t:'Xavotirli paytlarda o\'zingizga nisbatan yumshoq bo\'ling. Siz hamma narsani bir vaqtda hal qilishingiz shart emas. Bir narsa — bir vaqtda.', p:'Xavotirlarni ro\'yxat qiling, so\'ng qaysi biri bugun muhimini belgilang.' },
-    creative: { e:'🎨', t:'Ijod — xavotirning eng yaxshi dori! Qo\'lingizga biror narsa oling: bo\'yoq, qalam, yoki klaviatura. Hissiyotlaringizni chiqarib tashlang.', p:'Hozirgi xavotiringizni rasm yoki so\'z bilan ifodalashga urining.' },
-    relation: { e:'🤗', t:'Munosabatlardagi xavotir — ko\'pincha yetarlicha muhabbat borligidan. Samimiy gapirish ko\'p narsani yechadi. Kimga biror narsa aytmoqchi edingiz?', p:'Ichingizda saqlab yurgan narsani yozing — aytishingiz shart emas.' },
-  },
-  searching: {
-    self:     { e:'🔍', t:'Izlash — o\'sishning belgisi! Siz qanday odam bo\'lmoqchiligi uchun javob qidiryapsiz — bu juda katta ish. Javoblar sekin keladi, lekin siz to\'g\'ri yo\'ldasiz.', p:'"Men qanday odam bo\'lmoqchiman?" — bunga javob yozing.' },
-    goals:    { e:'🧭', t:'Maqsadsiz his qilayotgan bo\'lsangiz — bu normal. Ko\'p odamlar shu holatda. Kichik qadamdan boshlang: bugun qaysi bir yangi narsa o\'rganing va qanday his qilganingizni kuzating.', p:'Hayotingizda nima sizni haqiqatan qiziqtiradi? Ro\'yxat tuzing.' },
-    hard:     { e:'🌙', t:'Qidirish — jasorat. Ko\'pchilik qidirmasdan yuradi. Qiyinchilik ichida ham ma\'no bor — balki u ma\'no sizni shu yo\'lga olib chiqyapti.', p:'Qaysi qiyinchilik sizni eng ko\'p o\'stirdi? Uning ma\'nosini toping.' },
-    creative: { e:'💡', t:'Ijod — javob topishning eng yaxshi yo\'llaridan biri. Qog\'ozga chiqarib tashlang — savollar, fikrlar, rasmlar. Hech qanday tizim kerak emas.', p:'Hozir miyangizda nima bor? Hamma narsani yozing — tartibsiz bo\'lsa ham.' },
-    relation: { e:'🌸', t:'Ba\'zan biz o\'zimizni munosabatlarda yo\'qotib qo\'yamiz. Kim siz bo\'lmasangiz ham? Qaysi munosabatlarda o\'zingiz emassiz? Bu savollar muhim.', p:'"Odamlar bilan bo\'lganda o\'zim bo\'layapmanmi?" — deb yozing.' },
-  },
-};
-
-let inspState = { mood: null, topic: null };
+const inspState = { mood: null, topic: null, shownIdxs: new Set(), currentIdx: null };
 
 function initInspiration() {
   document.querySelectorAll('.mood-btn').forEach(btn => {
@@ -696,6 +667,7 @@ function initInspiration() {
       document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       inspState.mood = btn.dataset.mood;
+      inspState.shownIdxs.clear();
       document.getElementById('inspStep1').classList.add('hidden');
       document.getElementById('inspStep2').classList.remove('hidden');
       document.getElementById('inspResponse').classList.add('hidden');
@@ -705,39 +677,72 @@ function initInspiration() {
   document.querySelectorAll('.topic-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       inspState.topic = btn.dataset.topic;
+      inspState.shownIdxs.clear();
       showInspiration();
     });
   });
 
   document.getElementById('inspAgain').addEventListener('click', () => {
-    inspState.mood = null; inspState.topic = null;
+    inspState.mood = null; inspState.topic = null; inspState.shownIdxs.clear();
     document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('inspStep1').classList.remove('hidden');
     document.getElementById('inspStep2').classList.add('hidden');
     document.getElementById('inspResponse').classList.add('hidden');
   });
 
+  document.getElementById('likeBtn').addEventListener('click', () => {
+    const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
+    if (!pool) return;
+    const item = pool[inspState.currentIdx];
+    // Save liked to localStorage
+    const likes = JSON.parse(localStorage.getItem('insp_likes') || '[]');
+    if (!likes.find(l => l.t === item.t)) likes.push(item);
+    localStorage.setItem('insp_likes', JSON.stringify(likes));
+    const btn = document.getElementById('likeBtn');
+    btn.textContent = '❤️ Saqlandi!';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = '❤️ Yoqdi'; btn.disabled = false; }, 2000);
+  });
+
+  document.getElementById('dislikeBtn').addEventListener('click', () => {
+    showInspiration(); // show next random
+  });
+
   document.getElementById('saveToDiary').addEventListener('click', () => {
-    const r = INSP[inspState.mood]?.[inspState.topic];
-    if (!r) return;
-    // Pre-fill note form and switch tab
+    const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
+    if (!pool) return;
+    const r = pool[inspState.currentIdx];
     document.querySelector('.dnav[data-tab="notes"]').click();
     document.getElementById('noteFormWrap').classList.remove('hidden');
     document.getElementById('noteTitle').value = r.e + ' Ilhom — ' + new Date().toLocaleDateString('uz-UZ');
-    document.getElementById('noteContent').value = r.t + '\n\n' + r.p;
+    document.getElementById('noteContent').value = r.t + '\n\n💭 ' + r.p;
     document.getElementById('noteContent').focus();
   });
 }
 
 function showInspiration() {
-  const r = INSP[inspState.mood]?.[inspState.topic];
-  if (!r) return;
+  const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
+  if (!pool) return;
+
+  // Pick unshown index
+  let candidates = pool.map((_, i) => i).filter(i => !inspState.shownIdxs.has(i));
+  if (!candidates.length) { inspState.shownIdxs.clear(); candidates = pool.map((_, i) => i); }
+  const idx = candidates[Math.floor(Math.random() * candidates.length)];
+  inspState.shownIdxs.add(idx);
+  inspState.currentIdx = idx;
+
+  const r = pool[idx];
   document.getElementById('inspStep2').classList.add('hidden');
   const resp = document.getElementById('inspResponse');
   resp.classList.remove('hidden');
+  // Animate re-render
+  resp.style.opacity = '0';
+  setTimeout(() => { resp.style.transition = 'opacity 0.4s'; resp.style.opacity = '1'; }, 10);
   document.getElementById('inspEmoji').textContent = r.e;
   document.getElementById('inspText').textContent = r.t;
   document.getElementById('inspPrompt').textContent = '💭 ' + r.p;
+  document.getElementById('likeBtn').textContent = '❤️ Yoqdi';
+  document.getElementById('likeBtn').disabled = false;
 }
 
 // ════════════════════════════════════════════
