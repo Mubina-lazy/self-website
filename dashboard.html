@@ -139,6 +139,26 @@
         </div>
 
         <div class="inspire-wrap">
+
+          <!-- AI key setup -->
+          <div class="ai-key-bar" id="aiKeyBar">
+            <div class="ai-key-info">
+              <span>🤖</span>
+              <div>
+                <strong>AI ilhom yoqish</strong>
+                <p>Anthropic API kaliti kerak — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> dan oling (bepul)</p>
+              </div>
+            </div>
+            <div class="ai-key-input-row">
+              <input type="password" id="apiKeyInput" placeholder="sk-ant-..." class="ai-key-field" />
+              <button id="saveApiKey" class="btn btn--primary">Saqlash</button>
+            </div>
+          </div>
+          <div class="ai-key-saved hidden" id="aiKeySaved">
+            <span>🤖 AI yoqilgan</span>
+            <button id="resetApiKey" class="ai-key-reset">kalitni o'chirish</button>
+          </div>
+
           <!-- Step 1: Mood -->
           <div class="inspire-step" id="inspStep1">
             <p class="inspire-q">Hozir kayfiyating qanday?</p>
@@ -256,8 +276,10 @@ document.querySelectorAll('.dnav').forEach(btn => {
     btn.classList.add('active');
     document.querySelectorAll('.dtab').forEach(t => t.classList.remove('dtab--active'));
     document.getElementById('tab-' + btn.dataset.tab).classList.add('dtab--active');
-    // Init canvas when draw tab opened
-    if (btn.dataset.tab === 'draw') setTimeout(resizeCanvas, 50);
+    if (btn.dataset.tab === 'draw') {
+      // Wait for layout then resize
+      requestAnimationFrame(() => requestAnimationFrame(resizeCanvas));
+    }
   });
 });
 
@@ -474,13 +496,13 @@ function initCanvas() {
 const canvas = document.getElementById('drawCanvas');
 const ctx = canvas.getContext('2d');
 const state = { drawing: false, color: '#ec4899', size: 4, tool: 'brush', template: null };
+let lastX = 0, lastY = 0;
 
 function resizeCanvas() {
   const wrap = document.querySelector('.canvas-wrap');
   const w = wrap.clientWidth;
-  if (!w) return; // tab hidden
-  const h = Math.min(w * 0.65, 500);
-  // Save current drawing to temp canvas
+  if (!w) return;
+  const h = Math.min(Math.max(w * 0.65, 300), 520);
   const tmp = document.createElement('canvas');
   tmp.width = canvas.width; tmp.height = canvas.height;
   tmp.getContext('2d').drawImage(canvas, 0, 0);
@@ -501,40 +523,42 @@ function setTool(tool) {
   document.getElementById('toolEraser').classList.toggle('tool-btn--active', tool === 'eraser');
 }
 
-function getPos(e, canvas) {
-  const r = canvas.getBoundingClientRect();
+function getPos(e, cvs) {
+  const r = cvs.getBoundingClientRect();
   const src = e.touches ? e.touches[0] : e;
-  return { x: src.clientX - r.left, y: src.clientY - r.top };
+  // Scale CSS pixels → canvas buffer pixels
+  return {
+    x: (src.clientX - r.left) * (cvs.width / r.width),
+    y: (src.clientY - r.top)  * (cvs.height / r.height),
+  };
 }
 
 function startDraw(e) {
   e.preventDefault();
   state.drawing = true;
-  const { x, y } = getPos(e, canvas);
-  ctx.beginPath();
-  ctx.moveTo(x, y);
+  const p = getPos(e, canvas);
+  lastX = p.x; lastY = p.y;
 }
 
 function draw(e) {
   e.preventDefault();
   if (!state.drawing) return;
   const { x, y } = getPos(e, canvas);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(x, y);
   ctx.lineWidth = state.size;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.strokeStyle = state.tool === 'eraser' ? '#ffffff' : state.color;
-  ctx.globalCompositeOperation = state.tool === 'eraser' ? 'destination-out' : 'source-over';
-  ctx.lineTo(x, y);
   ctx.stroke();
+  lastX = x; lastY = y;
 }
 
-function endDraw(e) {
-  e.preventDefault();
-  state.drawing = false;
-  ctx.globalCompositeOperation = 'source-over';
-}
+function endDraw(e) { e.preventDefault(); state.drawing = false; }
 
 function setupCanvasDrawing() {
+  canvas.style.touchAction = 'none';
   canvas.addEventListener('mousedown', startDraw);
   canvas.addEventListener('mousemove', draw);
   canvas.addEventListener('mouseup', endDraw);
@@ -657,11 +681,76 @@ function drawTemplate(name) {
 }
 
 // ════════════════════════════════════════════
-// INSPIRATION ENGINE (random pool + like/dislike)
+// INSPIRATION ENGINE (AI + pool fallback)
 // ════════════════════════════════════════════
-const inspState = { mood: null, topic: null, shownIdxs: new Set(), currentIdx: null };
+const inspState = { mood: null, topic: null, shownIdxs: new Set(), currentIdx: null, lastAiText: null };
+
+const MOOD_LBL  = { happy:'baxtli', sad:'tushkun', strong:'kuchli va energiyali', anxious:'xavotirli', searching:'o\'zini qidiraman' };
+const TOPIC_LBL = { self:'o\'zini sevish va qadriyat', goals:'maqsadlar va o\'sish', hard:'qiyin kunlar va bardosh', creative:'ijod va salohiyat', relation:'munosabatlar va sevgi' };
+const MOOD_EMOJIS = { happy:'🌸', sad:'💙', strong:'⚡', anxious:'🌿', searching:'🔭' };
+
+function initApiKeyUI() {
+  const key = localStorage.getItem('anthropic_key');
+  if (key) {
+    document.getElementById('aiKeyBar').classList.add('hidden');
+    document.getElementById('aiKeySaved').classList.remove('hidden');
+  }
+  document.getElementById('saveApiKey').addEventListener('click', () => {
+    const k = document.getElementById('apiKeyInput').value.trim();
+    if (!k) return;
+    localStorage.setItem('anthropic_key', k);
+    document.getElementById('aiKeyBar').classList.add('hidden');
+    document.getElementById('aiKeySaved').classList.remove('hidden');
+  });
+  document.getElementById('resetApiKey').addEventListener('click', () => {
+    localStorage.removeItem('anthropic_key');
+    document.getElementById('aiKeySaved').classList.add('hidden');
+    document.getElementById('aiKeyBar').classList.remove('hidden');
+    document.getElementById('apiKeyInput').value = '';
+  });
+}
+
+async function callAnthropicAI(mood, topic) {
+  const key = localStorage.getItem('anthropic_key');
+  if (!key) return null;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 350,
+        messages: [{
+          role: 'user',
+          content: `Sen o'zbek tilida samimiy, mehribon va ilhomli do'stsiz. Foydalanuvchi hozir "${MOOD_LBL[mood]}" his qilyapti va "${TOPIC_LBL[topic]}" mavzusida ilhom olmoqchi.
+
+Har safar yangi, noyob, yurakdan chiqadigan ilhomli matn yoz (3-4 jumla). Ohangton samimiy va shaxsiy bo'lsin. Oxirgi qatorga faqat "💭" belgisi bilan boshlanadigan qisqa amaliy savol yoz. Boshqa hech narsa yozma — faqat ilhomli matn va savol.`
+        }]
+      })
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem('anthropic_key');
+      document.getElementById('aiKeySaved').classList.add('hidden');
+      document.getElementById('aiKeyBar').classList.remove('hidden');
+      return null;
+    }
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    return data.content?.[0]?.text || null;
+  } catch { return null; }
+}
 
 function initInspiration() {
+  initApiKeyUI();
+
   document.querySelectorAll('.mood-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
@@ -691,12 +780,9 @@ function initInspiration() {
   });
 
   document.getElementById('likeBtn').addEventListener('click', () => {
-    const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
-    if (!pool) return;
-    const item = pool[inspState.currentIdx];
-    // Save liked to localStorage
+    const text = document.getElementById('inspText').textContent;
     const likes = JSON.parse(localStorage.getItem('insp_likes') || '[]');
-    if (!likes.find(l => l.t === item.t)) likes.push(item);
+    if (!likes.includes(text)) likes.push(text);
     localStorage.setItem('insp_likes', JSON.stringify(likes));
     const btn = document.getElementById('likeBtn');
     btn.textContent = '❤️ Saqlandi!';
@@ -704,45 +790,63 @@ function initInspiration() {
     setTimeout(() => { btn.textContent = '❤️ Yoqdi'; btn.disabled = false; }, 2000);
   });
 
-  document.getElementById('dislikeBtn').addEventListener('click', () => {
-    showInspiration(); // show next random
-  });
+  document.getElementById('dislikeBtn').addEventListener('click', showInspiration);
 
   document.getElementById('saveToDiary').addEventListener('click', () => {
-    const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
-    if (!pool) return;
-    const r = pool[inspState.currentIdx];
+    const text = document.getElementById('inspText').textContent;
+    const prompt = document.getElementById('inspPrompt').textContent;
+    const emoji = document.getElementById('inspEmoji').textContent;
     document.querySelector('.dnav[data-tab="notes"]').click();
     document.getElementById('noteFormWrap').classList.remove('hidden');
-    document.getElementById('noteTitle').value = r.e + ' Ilhom — ' + new Date().toLocaleDateString('uz-UZ');
-    document.getElementById('noteContent').value = r.t + '\n\n💭 ' + r.p;
+    document.getElementById('noteTitle').value = emoji + ' Ilhom — ' + new Date().toLocaleDateString('uz-UZ');
+    document.getElementById('noteContent').value = text + '\n\n' + prompt;
     document.getElementById('noteContent').focus();
   });
 }
 
-function showInspiration() {
-  const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
-  if (!pool) return;
-
-  // Pick unshown index
-  let candidates = pool.map((_, i) => i).filter(i => !inspState.shownIdxs.has(i));
-  if (!candidates.length) { inspState.shownIdxs.clear(); candidates = pool.map((_, i) => i); }
-  const idx = candidates[Math.floor(Math.random() * candidates.length)];
-  inspState.shownIdxs.add(idx);
-  inspState.currentIdx = idx;
-
-  const r = pool[idx];
-  document.getElementById('inspStep2').classList.add('hidden');
+async function showInspiration() {
   const resp = document.getElementById('inspResponse');
+  document.getElementById('inspStep2').classList.add('hidden');
   resp.classList.remove('hidden');
-  // Animate re-render
   resp.style.opacity = '0';
+
+  // Show loading
+  document.getElementById('inspEmoji').textContent = '✨';
+  document.getElementById('inspText').textContent = 'Yozilmoqda...';
+  document.getElementById('inspPrompt').textContent = '';
+  document.getElementById('likeBtn').disabled = true;
   setTimeout(() => { resp.style.transition = 'opacity 0.4s'; resp.style.opacity = '1'; }, 10);
-  document.getElementById('inspEmoji').textContent = r.e;
-  document.getElementById('inspText').textContent = r.t;
-  document.getElementById('inspPrompt').textContent = '💭 ' + r.p;
-  document.getElementById('likeBtn').textContent = '❤️ Yoqdi';
+
+  // Try AI first
+  const aiText = await callAnthropicAI(inspState.mood, inspState.topic);
+
   document.getElementById('likeBtn').disabled = false;
+
+  if (aiText) {
+    const lines = aiText.trim().split('\n');
+    const promptLine = lines.find(l => l.trim().startsWith('💭'));
+    const mainLines = lines.filter(l => !l.trim().startsWith('💭')).join('\n').trim();
+    document.getElementById('inspEmoji').textContent = MOOD_EMOJIS[inspState.mood] || '✨';
+    document.getElementById('inspText').textContent = mainLines;
+    document.getElementById('inspPrompt').textContent = promptLine ? promptLine.trim() : '';
+  } else {
+    // Fallback to pool
+    const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
+    if (!pool) return;
+    let candidates = pool.map((_, i) => i).filter(i => !inspState.shownIdxs.has(i));
+    if (!candidates.length) { inspState.shownIdxs.clear(); candidates = pool.map((_, i) => i); }
+    const idx = candidates[Math.floor(Math.random() * candidates.length)];
+    inspState.shownIdxs.add(idx);
+    inspState.currentIdx = idx;
+    const r = pool[idx];
+    document.getElementById('inspEmoji').textContent = r.e;
+    document.getElementById('inspText').textContent = r.t;
+    document.getElementById('inspPrompt').textContent = '💭 ' + r.p;
+  }
+
+  resp.style.opacity = '0';
+  setTimeout(() => { resp.style.opacity = '1'; }, 10);
+  document.getElementById('likeBtn').textContent = '❤️ Yoqdi';
 }
 
 // ════════════════════════════════════════════
