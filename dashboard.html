@@ -469,8 +469,7 @@ function launchFlightAnimation(emoji, gender) {
   document.body.appendChild(el);
 
   const ctx = canvas.getContext('2d');
-  const trail = [];
-  const TRAIL_LEN = 70;
+  let trail = [];  // points for the current loop (persistent dashed path)
 
   function resize() {
     canvas.width = window.innerWidth;
@@ -479,34 +478,34 @@ function launchFlightAnimation(emoji, gender) {
   resize();
   window.addEventListener('resize', resize);
 
-  // One loop duration (animation runs forever)
-  const LOOP_MS = gender === 'girl' ? 9000 : 16000;
+  const LOOP_MS = gender === 'girl' ? 11000 : 16000;
 
   function getPos(t) {
     const W = window.innerWidth, H = window.innerHeight;
     if (gender === 'girl') {
-      // Small heart, drifting slowly across the page so it isn't static
-      const s = Math.min(W, H) / 42;               // heart radius factor
-      const driftX = (Math.sin(t * 0.18) * 0.5 + 0.5) * (W - 320) + 160;
-      const driftY = (Math.cos(t * 0.13) * 0.5 + 0.5) * (H - 320) + 160;
-      // Standard heart parametric (upright)
-      const hx = driftX + s * 16 * Math.pow(Math.sin(t), 3);
-      const hy = driftY - s * (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+      // Heart fixed & centered so it never leaves the screen
+      const B = Math.min(W, H) * 0.55;
+      const scale = B / 34;
+      const cx = W / 2;
+      const cy = H / 2 - 6 * scale;  // vertical centering of the heart shape
+      // Standard heart parametric (t: 0 → 2π draws one full heart)
+      const hx = cx + scale * 16 * Math.pow(Math.sin(t), 3);
+      const hy = cy - scale * (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
       return { x: hx, y: hy };
     } else {
-      // Lissajous: covers full viewport, loops cleanly
+      // Lissajous: covers the viewport but stays inside it
       return {
-        x: W / 2 + W * 0.42 * Math.sin(2 * t + 0.5),
-        y: H / 2 + H * 0.38 * Math.sin(3 * t)
+        x: W / 2 + W * 0.40 * Math.sin(2 * t + 0.5),
+        y: H / 2 + H * 0.36 * Math.sin(3 * t)
       };
     }
   }
 
-  const trailColor = gender === 'girl'
-    ? (p) => `rgba(244,114,182,${p * 0.75})`   // pink for airplane
-    : (p) => `rgba(251,191,36,${p * 0.8})`;    // amber for rocket
+  const dashColor = gender === 'girl' ? 'rgba(236,72,153,0.85)' : 'rgba(251,191,36,0.9)';
+  // ✈️ and 🚀 both point to the upper-right (NE) by default → rotate by +45°
+  const ROT_OFFSET = 45;
 
-  let lastX = 0, lastY = 0, startTime = null;
+  let lastX = 0, lastY = 0, startTime = null, loopIndex = 0;
 
   function frame(ts) {
     if (!startTime) {
@@ -515,29 +514,35 @@ function launchFlightAnimation(emoji, gender) {
       lastX = p0.x; lastY = p0.y;
     }
     const elapsed = ts - startTime;
+    const currentLoop = Math.floor(elapsed / LOOP_MS);
+    if (currentLoop !== loopIndex) {   // new loop → redraw fresh heart
+      loopIndex = currentLoop;
+      trail = [];
+    }
     const t = (elapsed / LOOP_MS) * Math.PI * 2;
     const { x, y } = getPos(t);
 
     trail.push({ x, y });
-    if (trail.length > TRAIL_LEN) trail.shift();
 
-    let angle = Math.atan2(y - lastY, x - lastX) * 180 / Math.PI;
-    angle += gender === 'girl' ? 0 : 45;  // ✈️ faces right, 🚀 faces up-left
+    // Nose follows the travel direction smoothly
+    const angle = Math.atan2(y - lastY, x - lastX) * 180 / Math.PI + ROT_OFFSET;
     el.style.left = (x - 16) + 'px';
     el.style.top  = (y - 16) + 'px';
     el.style.transform = `rotate(${angle}deg)`;
 
+    // Draw the full dashed trail for this loop (like the reference image)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let i = 1; i < trail.length; i++) {
-      const p = i / trail.length;
-      ctx.beginPath();
-      ctx.moveTo(trail[i-1].x, trail[i-1].y);
-      ctx.lineTo(trail[i].x, trail[i].y);
-      ctx.strokeStyle = trailColor(p);
-      ctx.lineWidth = p * 5;
-      ctx.lineCap = 'round';
-      ctx.stroke();
+    ctx.setLineDash([7, 7]);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = dashColor;
+    ctx.beginPath();
+    for (let i = 0; i < trail.length; i++) {
+      if (i === 0) ctx.moveTo(trail[i].x, trail[i].y);
+      else ctx.lineTo(trail[i].x, trail[i].y);
     }
+    ctx.stroke();
+    ctx.setLineDash([]);
 
     lastX = x; lastY = y;
     requestAnimationFrame(frame);  // loop forever
