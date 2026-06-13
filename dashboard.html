@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20260613d" />
+  <link rel="stylesheet" href="style.css?v=20260613e" />
 </head>
 <body class="dash-body">
 
@@ -461,20 +461,6 @@ function createGirlSky() {
     mote.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;animation-delay:${(Math.random()*5).toFixed(2)}s;animation-duration:${(2.5+Math.random()*3).toFixed(2)}s`;
     sky.appendChild(mote);
   }
-
-  // Fluttering butterflies
-  const flySpots = [
-    { top: '30%', dur: 22, delay: 0,   emoji: '🦋' },
-    { top: '55%', dur: 28, delay: -8,  emoji: '🦋' },
-    { top: '68%', dur: 25, delay: -16, emoji: '🌸' },
-  ];
-  flySpots.forEach(f => {
-    const fly = document.createElement('div');
-    fly.className = 'gsky-flutter';
-    fly.textContent = f.emoji;
-    fly.style.cssText = `top:${f.top};animation-duration:${f.dur}s;animation-delay:${f.delay}s`;
-    sky.appendChild(fly);
-  });
 
   // Flying birds (gull "m" shapes)
   const birdSvg = '<svg viewBox="0 0 24 12"><path d="M1 9 Q6 1 12 7 Q18 1 23 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
