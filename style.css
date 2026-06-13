@@ -1215,44 +1215,93 @@ body {
   background: linear-gradient(180deg, #5f6a7d 0%, #7c8696 50%, #98a1b0 100%);
 }
 
-/* Sun */
-.gsky-sun {
-  position: absolute; top: 7%; right: 9%;
-  width: 90px; height: 90px; border-radius: 50%;
-  background: radial-gradient(circle at 40% 40%, #fff7cc, #ffd23f 60%, #ffb703);
-  box-shadow: 0 0 50px 16px rgba(255,210,63,0.5), 0 0 90px 30px rgba(255,183,3,0.25);
-  animation: gsky-sun-pulse 6s ease-in-out infinite;
+/* Sun with rotating rays + soft pulsing glow */
+.gsky-sun-wrap {
+  position: absolute; top: 6%; right: 8%;
+  width: 96px; height: 96px;
   transition: opacity 3s ease, transform 3s ease;
 }
+.gsky-rays {
+  position: absolute; inset: -55px; border-radius: 50%;
+  background: conic-gradient(from 0deg,
+    rgba(255,213,79,0.0) 0deg, rgba(255,213,79,0.35) 8deg, rgba(255,213,79,0.0) 16deg,
+    rgba(255,213,79,0.0) 30deg, rgba(255,213,79,0.35) 38deg, rgba(255,213,79,0.0) 46deg,
+    rgba(255,213,79,0.0) 60deg, rgba(255,213,79,0.35) 68deg, rgba(255,213,79,0.0) 76deg,
+    rgba(255,213,79,0.0) 90deg, rgba(255,213,79,0.35) 98deg, rgba(255,213,79,0.0) 106deg,
+    rgba(255,213,79,0.0) 120deg,rgba(255,213,79,0.35) 128deg,rgba(255,213,79,0.0) 136deg,
+    rgba(255,213,79,0.0) 150deg,rgba(255,213,79,0.35) 158deg,rgba(255,213,79,0.0) 166deg,
+    rgba(255,213,79,0.0) 180deg,rgba(255,213,79,0.35) 188deg,rgba(255,213,79,0.0) 196deg,
+    rgba(255,213,79,0.0) 210deg,rgba(255,213,79,0.35) 218deg,rgba(255,213,79,0.0) 226deg,
+    rgba(255,213,79,0.0) 240deg,rgba(255,213,79,0.35) 248deg,rgba(255,213,79,0.0) 256deg,
+    rgba(255,213,79,0.0) 270deg,rgba(255,213,79,0.35) 278deg,rgba(255,213,79,0.0) 286deg,
+    rgba(255,213,79,0.0) 300deg,rgba(255,213,79,0.35) 308deg,rgba(255,213,79,0.0) 316deg,
+    rgba(255,213,79,0.0) 330deg,rgba(255,213,79,0.35) 338deg,rgba(255,213,79,0.0) 346deg);
+  -webkit-mask: radial-gradient(circle, transparent 46px, #000 48px);
+          mask: radial-gradient(circle, transparent 46px, #000 48px);
+  animation: gsky-rays-spin 60s linear infinite;
+}
+@keyframes gsky-rays-spin { to { transform: rotate(360deg); } }
+.gsky-sun {
+  position: absolute; inset: 3px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #fff7cc, #ffd23f 58%, #ffb703);
+  box-shadow: 0 0 50px 16px rgba(255,210,63,0.5), 0 0 90px 30px rgba(255,183,3,0.22);
+  animation: gsky-sun-pulse 6s ease-in-out infinite;
+}
 @keyframes gsky-sun-pulse {
-  0%,100% { box-shadow: 0 0 50px 16px rgba(255,210,63,0.5), 0 0 90px 30px rgba(255,183,3,0.25); }
-  50%     { box-shadow: 0 0 70px 24px rgba(255,210,63,0.65),0 0 120px 45px rgba(255,183,3,0.35); }
+  0%,100% { box-shadow: 0 0 50px 16px rgba(255,210,63,0.5), 0 0 90px 30px rgba(255,183,3,0.22); }
+  50%     { box-shadow: 0 0 72px 26px rgba(255,210,63,0.65),0 0 130px 50px rgba(255,183,3,0.34); }
 }
-.girl-sky.rainy .gsky-sun { opacity: 0; transform: translateY(-40px); }
+.girl-sky.rainy .gsky-sun-wrap { opacity: 0; transform: translateY(-40px); }
 
-/* Clouds */
+/* Fluffy multi-puff clouds */
 .gsky-cloud {
-  position: absolute; left: -160px;
-  width: 100px; height: 34px; background: #fff; border-radius: 100px;
-  opacity: 0.92; filter: drop-shadow(0 6px 10px rgba(120,120,150,0.12));
+  position: absolute; left: -180px; width: 140px; height: 80px;
+  transform: scale(var(--s, 1));
+  filter: drop-shadow(0 8px 12px rgba(120,120,150,0.16));
   animation-name: gsky-drift; animation-timing-function: linear; animation-iteration-count: infinite;
-  transition: background 3s ease, opacity 3s ease;
 }
-.gsky-cloud::before, .gsky-cloud::after {
-  content: ''; position: absolute; background: #fff; border-radius: 50%;
+.gsky-puff {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #ffffff, #f3f6ff 80%);
   transition: background 3s ease;
 }
-.gsky-cloud::before { width: 50px; height: 50px; top: -22px; left: 16px; }
-.gsky-cloud::after  { width: 36px; height: 36px; top: -14px; right: 16px; }
 @keyframes gsky-drift {
-  from { left: -160px; }
-  to   { left: calc(100% + 160px); }
+  from { left: -180px; }
+  to   { left: calc(100% + 180px); }
 }
 /* Rainy → grey, heavier clouds */
-.girl-sky.rainy .gsky-cloud,
-.girl-sky.rainy .gsky-cloud::before,
-.girl-sky.rainy .gsky-cloud::after { background: #8b95a3; }
-.girl-sky.rainy .gsky-cloud { opacity: 0.96; }
+.girl-sky.rainy .gsky-puff {
+  background: radial-gradient(circle at 38% 32%, #9aa3b2, #79828f 85%);
+}
+
+/* Shimmering light motes drifting in the sunlight */
+.gsky-mote {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle, #fffdf0, rgba(255,236,170,0.6));
+  box-shadow: 0 0 6px 1px rgba(255,236,170,0.8);
+  animation: gsky-mote-twinkle ease-in-out infinite;
+  transition: opacity 3s ease;
+}
+@keyframes gsky-mote-twinkle {
+  0%,100% { opacity: 0.15; transform: translateY(0) scale(0.7); }
+  50%     { opacity: 0.95; transform: translateY(-10px) scale(1.25); }
+}
+.girl-sky.rainy .gsky-mote { opacity: 0 !important; }
+
+/* Fluttering butterflies / petals */
+.gsky-flutter {
+  position: absolute; left: -40px; font-size: 1.4rem;
+  animation-name: gsky-flutter-move; animation-timing-function: linear; animation-iteration-count: infinite;
+  transition: opacity 2.5s ease;
+}
+@keyframes gsky-flutter-move {
+  0%   { left: -40px;  transform: translateY(0) rotate(-8deg); }
+  25%  { transform: translateY(-28px) rotate(8deg); }
+  50%  { transform: translateY(8px) rotate(-6deg); }
+  75%  { transform: translateY(-22px) rotate(10deg); }
+  100% { left: calc(100% + 40px); transform: translateY(0) rotate(-8deg); }
+}
+.girl-sky.rainy .gsky-flutter { opacity: 0; }
 
 /* Birds */
 .gsky-bird {

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20260613c" />
+  <link rel="stylesheet" href="style.css?v=20260613d" />
 </head>
 <body class="dash-body">
 
@@ -418,24 +418,62 @@ function createGirlSky() {
   const sky = document.createElement('div');
   sky.className = 'girl-sky';
 
-  // Sun
-  const sun = document.createElement('div');
-  sun.className = 'gsky-sun';
-  sky.appendChild(sun);
+  // Sun with rotating rays + soft glow
+  const sunWrap = document.createElement('div');
+  sunWrap.className = 'gsky-sun-wrap';
+  sunWrap.innerHTML = '<div class="gsky-rays"></div><div class="gsky-sun"></div>';
+  sky.appendChild(sunWrap);
 
-  // Drifting clouds
+  // Fluffy multi-puff clouds (built from several soft circles for realism)
+  const puffLayout = [
+    { w: 64, h: 64, l: 38, t: 6  },
+    { w: 46, h: 46, l: 8,  t: 22 },
+    { w: 52, h: 52, l: 82, t: 18 },
+    { w: 38, h: 38, l: 58, t: -4 },
+    { w: 40, h: 40, l: 24, t: 14 },
+  ];
   const cloudSpots = [
-    { top: '12%', dur: 70, delay: 0,   scale: 1   },
-    { top: '22%', dur: 95, delay: -30, scale: 0.7 },
-    { top: '34%', dur: 80, delay: -55, scale: 1.2 },
-    { top: '48%', dur: 110,delay: -20, scale: 0.85},
-    { top: '60%', dur: 90, delay: -70, scale: 1.05},
+    { top: '10%', dur: 75,  delay: 0,   scale: 1   },
+    { top: '20%', dur: 100, delay: -35, scale: 0.7 },
+    { top: '32%', dur: 85,  delay: -60, scale: 1.25},
+    { top: '46%', dur: 120, delay: -20, scale: 0.9 },
+    { top: '58%', dur: 95,  delay: -75, scale: 1.1 },
+    { top: '72%', dur: 110, delay: -45, scale: 0.8 },
   ];
   cloudSpots.forEach(c => {
     const cl = document.createElement('div');
     cl.className = 'gsky-cloud';
-    cl.style.cssText = `top:${c.top};transform:scale(${c.scale});animation-duration:${c.dur}s;animation-delay:${c.delay}s`;
+    cl.style.cssText = `top:${c.top};--s:${c.scale};animation-duration:${c.dur}s;animation-delay:${c.delay}s`;
+    puffLayout.forEach(p => {
+      const puff = document.createElement('span');
+      puff.className = 'gsky-puff';
+      puff.style.cssText = `width:${p.w}px;height:${p.h}px;left:${p.l}px;top:${p.t}px`;
+      cl.appendChild(puff);
+    });
     sky.appendChild(cl);
+  });
+
+  // Shimmering light motes (warm sparkles drifting in the sunlight) → "alive" feel
+  for (let i = 0; i < 36; i++) {
+    const mote = document.createElement('span');
+    mote.className = 'gsky-mote';
+    const sz = 2 + Math.random() * 3;
+    mote.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;animation-delay:${(Math.random()*5).toFixed(2)}s;animation-duration:${(2.5+Math.random()*3).toFixed(2)}s`;
+    sky.appendChild(mote);
+  }
+
+  // Fluttering butterflies
+  const flySpots = [
+    { top: '30%', dur: 22, delay: 0,   emoji: '🦋' },
+    { top: '55%', dur: 28, delay: -8,  emoji: '🦋' },
+    { top: '68%', dur: 25, delay: -16, emoji: '🌸' },
+  ];
+  flySpots.forEach(f => {
+    const fly = document.createElement('div');
+    fly.className = 'gsky-flutter';
+    fly.textContent = f.emoji;
+    fly.style.cssText = `top:${f.top};animation-duration:${f.dur}s;animation-delay:${f.delay}s`;
+    sky.appendChild(fly);
   });
 
   // Flying birds (gull "m" shapes)
