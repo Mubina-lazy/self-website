@@ -1206,11 +1206,13 @@ body {
 .girl-sky {
   position: fixed; inset: 0; z-index: 0;
   pointer-events: none; overflow: hidden;
+  /* Soft pastel daytime sky: blue up top fading to a warm pink horizon */
+  background: linear-gradient(180deg, #b8e4ff 0%, #d8f1ff 38%, #fde7f1 78%, #fff3f7 100%);
   transition: background 3s ease;
 }
-/* Gloomy tint when rainy */
+/* Gloomy grey sky when rainy */
 .girl-sky.rainy {
-  background: linear-gradient(180deg, rgba(90,100,120,0.30), rgba(70,80,105,0.42));
+  background: linear-gradient(180deg, #5f6a7d 0%, #7c8696 50%, #98a1b0 100%);
 }
 
 /* Sun */
