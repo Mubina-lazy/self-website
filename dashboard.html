@@ -319,6 +319,14 @@ async function init() {
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) { window.location.href = 'auth.html'; return; }
   currentUser = session.user;
+
+  // Force re-registration if old account (no birthday)
+  if (!currentUser.user_metadata?.birthday) {
+    await _supabase.auth.signOut();
+    window.location.href = 'auth.html?reregister=1';
+    return;
+  }
+
   userGender = currentUser.user_metadata?.gender || 'girl';
   isAdmin = currentUser.email === ADMIN_EMAIL;
   document.body.classList.add('theme-' + userGender);

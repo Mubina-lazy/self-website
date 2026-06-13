@@ -84,6 +84,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script>
+    // Show re-register notice for old accounts
+    if (new URLSearchParams(location.search).get('reregister')) {
+      const notice = document.createElement('div');
+      notice.style.cssText = 'background:linear-gradient(135deg,#fff0f7,#f5f3ff);border:1.5px solid rgba(236,72,153,0.3);border-radius:14px;padding:1rem 1.25rem;font-size:0.88rem;color:#4a2030;margin-bottom:1rem;text-align:center;line-height:1.6';
+      notice.innerHTML = '✨ <strong>Sayt yangilandi!</strong><br>Iltimos, yangi ma\'lumotlar bilan qayta ro\'yxatdan o\'ting.';
+      document.querySelector('.auth-wrap').insertBefore(notice, document.querySelector('.auth-card'));
+      // Auto-switch to register tab
+      setTimeout(() => document.querySelector('.atab[data-tab="register"]').click(), 300);
+    }
+
     // Handle email confirmation redirect (token in URL hash)
     _supabase.auth.onAuthStateChange((event, session) => {
       if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
