@@ -55,6 +55,14 @@
           <input type="text" id="regName" placeholder="Ismingiz" required />
         </div>
         <div class="field">
+          <label>Jins</label>
+          <div class="gender-row">
+            <button type="button" class="gender-btn selected" data-gender="girl">👧 Qiz</button>
+            <button type="button" class="gender-btn" data-gender="boy">👦 O'g'il</button>
+          </div>
+          <input type="hidden" id="regGender" value="girl" />
+        </div>
+        <div class="field">
           <label>Email</label>
           <input type="email" id="regEmail" placeholder="email@example.com" required autocomplete="email" />
         </div>
@@ -140,6 +148,15 @@
       resendBtn.disabled = false;
     });
 
+    // Gender selection
+    document.querySelectorAll('.gender-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('regGender').value = btn.dataset.gender;
+      });
+    });
+
     // Register
     document.getElementById('registerForm').addEventListener('submit', async e => {
       e.preventDefault();
@@ -154,7 +171,7 @@
       const { data, error } = await _supabase.auth.signUp({
         email:    document.getElementById('regEmail').value,
         password: document.getElementById('regPassword').value,
-        options:  { data: { name: document.getElementById('regName').value } },
+        options:  { data: { name: document.getElementById('regName').value, gender: document.getElementById('regGender').value } },
       });
 
       if (error) {

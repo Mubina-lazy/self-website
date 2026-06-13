@@ -11,6 +11,9 @@
 </head>
 <body class="dash-body">
 
+  <!-- Header decoration (girl sparkles / boy rocket added by JS) -->
+  <div id="headerDeco"></div>
+
   <header class="dash-header">
     <a href="index.html" class="dash-logo">with <em>Mubina</em></a>
     <nav class="dash-nav">
@@ -18,8 +21,10 @@
       <button class="dnav" data-tab="draw">🎨</button>
       <button class="dnav" data-tab="inspire">✨</button>
       <button class="dnav" data-tab="challenge">🏆</button>
+      <button class="dnav" data-tab="chat">💬</button>
     </nav>
     <div class="dash-user">
+      <span class="coin-balance" id="coinBalance" title="Mening hisobim">💰 $0</span>
       <span id="userName"></span>
       <button class="btn-logout" id="logoutBtn">Chiqish</button>
     </div>
@@ -42,13 +47,13 @@
           <div class="note-form">
             <input type="text" id="noteTitle" placeholder="Sarlavha (ixtiyoriy)" class="note-form__title" />
             <div class="note-fmt-bar">
-              <button type="button" class="fmt-btn" data-wrap="**" title="Bold"><b>B</b></button>
-              <button type="button" class="fmt-btn" data-wrap="*" title="Italic"><i>I</i></button>
-              <button type="button" class="fmt-btn" data-emoji="🌸" title="Emoji">🌸</button>
-              <button type="button" class="fmt-btn" data-emoji="💫" title="Emoji">💫</button>
-              <button type="button" class="fmt-btn" data-emoji="✨" title="Emoji">✨</button>
-              <button type="button" class="fmt-btn" data-emoji="💕" title="Emoji">💕</button>
-              <button type="button" class="fmt-btn" data-emoji="🌷" title="Emoji">🌷</button>
+              <button type="button" class="fmt-btn" data-wrap="**"><b>B</b></button>
+              <button type="button" class="fmt-btn" data-wrap="*"><i>I</i></button>
+              <button type="button" class="fmt-btn" data-emoji="🌸">🌸</button>
+              <button type="button" class="fmt-btn" data-emoji="💫">💫</button>
+              <button type="button" class="fmt-btn" data-emoji="✨">✨</button>
+              <button type="button" class="fmt-btn" data-emoji="💕">💕</button>
+              <button type="button" class="fmt-btn" data-emoji="🌷">🌷</button>
             </div>
             <textarea id="noteContent" placeholder="Bugun nima haqida yozmoqchisiz?..." class="note-form__body" rows="5"></textarea>
             <div class="note-img-row">
@@ -92,7 +97,6 @@
         </div>
 
         <div class="draw-workspace">
-          <!-- Templates -->
           <div class="draw-templates">
             <p class="draw-templates-label">Shablon tanlang:</p>
             <div class="draw-templates-row">
@@ -104,10 +108,10 @@
             </div>
           </div>
 
-          <!-- Toolbar -->
           <div class="draw-toolbar">
             <div class="tool-group">
               <button class="tool-btn tool-btn--active" id="toolBrush" title="Mo'yqalam">🖌</button>
+              <button class="tool-btn" id="toolFill" title="To'ldirish (bo'yash)">🪣</button>
               <button class="tool-btn" id="toolEraser" title="O'chirg'ich">⬜</button>
             </div>
             <div class="tool-group">
@@ -120,7 +124,6 @@
             <input type="color" id="customColor" value="#ec4899" class="custom-color" title="O'z rang" />
           </div>
 
-          <!-- Canvas -->
           <div class="canvas-wrap">
             <canvas id="drawCanvas"></canvas>
           </div>
@@ -139,14 +142,12 @@
         </div>
 
         <div class="inspire-wrap">
-
-          <!-- AI key setup -->
           <div class="ai-key-bar" id="aiKeyBar">
             <div class="ai-key-info">
               <span>🤖</span>
               <div>
                 <strong>AI ilhom yoqish</strong>
-                <p>Anthropic API kaliti kerak — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> dan oling (bepul)</p>
+                <p>Anthropic API kaliti kerak — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> dan oling</p>
               </div>
             </div>
             <div class="ai-key-input-row">
@@ -159,7 +160,6 @@
             <button id="resetApiKey" class="ai-key-reset">kalitni o'chirish</button>
           </div>
 
-          <!-- Step 1: Mood -->
           <div class="inspire-step" id="inspStep1">
             <p class="inspire-q">Hozir kayfiyating qanday?</p>
             <div class="mood-grid">
@@ -171,7 +171,6 @@
             </div>
           </div>
 
-          <!-- Step 2: Topic -->
           <div class="inspire-step hidden" id="inspStep2">
             <p class="inspire-q">Qaysi mavzuda ilhom kerak?</p>
             <div class="topic-grid">
@@ -183,7 +182,6 @@
             </div>
           </div>
 
-          <!-- Response -->
           <div class="inspire-response hidden" id="inspResponse">
             <div class="insp-card">
               <div class="insp-card__emoji" id="inspEmoji"></div>
@@ -209,7 +207,7 @@
         <div class="dtab-head">
           <div>
             <h2 class="dtab-title">30 Kunlik Challenge</h2>
-            <p class="dtab-sub">Har kuni bir qadam oldinga 💫</p>
+            <p class="dtab-sub">Har kuni bir qadam oldinga 💫 · Har kun uchun $1 yutib olasiz!</p>
           </div>
           <div class="ch-progress-wrap">
             <div class="ch-progress-label"><span id="completedCount">0</span>/30 bajarildi</div>
@@ -218,6 +216,39 @@
         </div>
         <div class="ch-today" id="chToday"></div>
         <div class="ch-grid" id="chGrid"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ CHAT TAB ═══════════ -->
+    <section class="dtab" id="tab-chat">
+      <div class="dtab-inner">
+        <div class="dtab-head">
+          <div>
+            <h2 class="dtab-title">Admin bilan suhbat</h2>
+            <p class="dtab-sub">Mubina bilan yozishmalar 💌</p>
+          </div>
+        </div>
+
+        <div class="chat-wrap">
+          <!-- Admin thread selector (only shown for admin) -->
+          <div class="chat-threads-bar hidden" id="chatThreadsBar"></div>
+
+          <div class="chat-admin-notice" id="chatNotice">
+            💌 Bu yerda siz Mubina bilan yozishishingiz mumkin. Savollar, takliflar, his-tuyg'ularingizni yuboring!
+          </div>
+
+          <div class="chat-msg-list" id="chatMsgList">
+            <div class="chat-empty">
+              <div class="chat-empty__icon">💬</div>
+              <p>Hali xabarlar yo'q. Birinchi xabaringizni yuboring!</p>
+            </div>
+          </div>
+
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Xabar yozing..." maxlength="500" />
+            <button class="btn btn--primary" id="chatSendBtn">Yuborish</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -237,6 +268,31 @@
     </div>
   </div>
 
+  <!-- Challenge edit modal -->
+  <div class="modal-overlay hidden" id="editChModal">
+    <div class="modal" style="max-width:440px">
+      <div class="modal-head">
+        <h3 id="editChTitle">Vazifani tahrirlash</h3>
+        <button class="modal-close" id="editChClose">✕</button>
+      </div>
+      <div class="edit-ch-form">
+        <div class="field">
+          <label>Vazifa nomi</label>
+          <input type="text" id="editChName" maxlength="40" />
+        </div>
+        <div class="field">
+          <label>Tavsif</label>
+          <textarea id="editChDesc" rows="3" maxlength="160"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn--primary" id="editChSave">Saqlash</button>
+          <button class="btn btn--ghost" id="editChCancel">Bekor</button>
+          <button class="btn btn--danger" id="editChReset" style="margin-top:0">↺ Asl</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script>
@@ -249,6 +305,12 @@ let completedDays = new Set();
 let viewingNoteId = null;
 let pendingImageB64 = null;
 let selectedMood = null;
+let userGender = 'girl';
+let isAdmin = false;
+let customChallenges = {};
+let chatChannel = null;
+let chatThreadUserId = null; // for admin: which user's thread is shown
+const ADMIN_EMAIL = 'mubinabkhdr@gmail.com';
 
 // ════════════════════════════════════════════
 // INIT
@@ -257,14 +319,26 @@ async function init() {
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) { window.location.href = 'auth.html'; return; }
   currentUser = session.user;
+  userGender = currentUser.user_metadata?.gender || 'girl';
+  isAdmin = currentUser.email === ADMIN_EMAIL;
+  document.body.classList.add('theme-' + userGender);
+
   document.getElementById('userName').textContent =
     currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+
+  customChallenges = JSON.parse(localStorage.getItem('custom_ch_' + currentUser.id) || '{}');
+  updateCoinDisplay();
+  addHeaderDeco();
+  triggerWelcomeMoney();
+
   await Promise.all([loadNotes(), loadChallenges()]);
   initCanvas();
   initInspiration();
+  initChat();
 }
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
+  if (chatChannel) chatChannel.unsubscribe();
   await _supabase.auth.signOut();
   window.location.href = 'index.html';
 });
@@ -277,11 +351,95 @@ document.querySelectorAll('.dnav').forEach(btn => {
     document.querySelectorAll('.dtab').forEach(t => t.classList.remove('dtab--active'));
     document.getElementById('tab-' + btn.dataset.tab).classList.add('dtab--active');
     if (btn.dataset.tab === 'draw') {
-      // Wait for layout then resize
       requestAnimationFrame(() => requestAnimationFrame(resizeCanvas));
     }
   });
 });
+
+// ════════════════════════════════════════════
+// HEADER DECORATIONS
+// ════════════════════════════════════════════
+function addHeaderDeco() {
+  const deco = document.getElementById('headerDeco');
+  if (userGender === 'girl') {
+    deco.className = 'header-deco';
+    deco.innerHTML = '<span>✨</span><span>🌸</span><span>💫</span><span>🌷</span><span>⭐</span>';
+  } else {
+    deco.innerHTML = '<div class="rocket-deco">🚀</div><div class="star-trail">⭐</div><div class="star-trail">✦</div><div class="star-trail">·</div>';
+  }
+}
+
+// ════════════════════════════════════════════
+// COINS
+// ════════════════════════════════════════════
+function getCoins() { return parseInt(localStorage.getItem('coins_' + currentUser.id) || '0'); }
+
+function addCoin() {
+  const bal = getCoins() + 1;
+  localStorage.setItem('coins_' + currentUser.id, bal);
+  updateCoinDisplay(true);
+  showCoinBurst();
+  showMoneyRain();
+}
+
+function updateCoinDisplay(ping) {
+  const el = document.getElementById('coinBalance');
+  el.textContent = '💰 $' + getCoins();
+  if (ping) { el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping'); }
+}
+
+function showCoinBurst() {
+  const el = document.createElement('div');
+  el.className = 'coin-burst';
+  el.textContent = '+$1 🎉';
+  document.body.appendChild(el);
+  el.animate([
+    { transform: 'translate(-50%,-50%) scale(0.5)', opacity: 0 },
+    { transform: 'translate(-50%,-120%) scale(1.4)', opacity: 1, offset: 0.3 },
+    { transform: 'translate(-50%,-200%) scale(1)', opacity: 0 }
+  ], { duration: 1400, easing: 'ease-out' }).onfinish = () => el.remove();
+}
+
+function showMoneyRain() {
+  const overlay = document.createElement('div');
+  overlay.className = 'money-rain-overlay';
+  document.body.appendChild(overlay);
+  const items = ['💵','💰','🤑','💸','$','💎'];
+  for (let i = 0; i < 12; i++) {
+    const m = document.createElement('div');
+    m.className = 'falling-money';
+    m.textContent = items[Math.floor(Math.random() * items.length)];
+    m.style.left = Math.random() * 100 + 'vw';
+    m.style.animationDelay = Math.random() * 0.8 + 's';
+    m.style.animationDuration = (1.5 + Math.random()) + 's';
+    overlay.appendChild(m);
+  }
+  setTimeout(() => overlay.remove(), 3500);
+}
+
+function triggerWelcomeMoney() {
+  const key = 'welcomed_' + currentUser.id;
+  if (sessionStorage.getItem(key)) return;
+  sessionStorage.setItem(key, '1');
+  if (getCoins() > 0) {
+    setTimeout(() => {
+      const overlay = document.createElement('div');
+      overlay.className = 'money-rain-overlay';
+      document.body.appendChild(overlay);
+      const items = ['✨','🌟','💫','⭐','🌸'];
+      for (let i = 0; i < 18; i++) {
+        const m = document.createElement('div');
+        m.className = 'falling-money';
+        m.textContent = items[Math.floor(Math.random() * items.length)];
+        m.style.left = Math.random() * 100 + 'vw';
+        m.style.animationDelay = Math.random() * 1.2 + 's';
+        m.style.animationDuration = (1.8 + Math.random() * 1) + 's';
+        overlay.appendChild(m);
+      }
+      setTimeout(() => overlay.remove(), 4000);
+    }, 800);
+  }
+}
 
 // ════════════════════════════════════════════
 // NOTES
@@ -306,15 +464,14 @@ function renderNotes() {
     card.innerHTML = `
       ${hasImg ? `<div class="note-card__thumb"><img src="${note.image}" alt="" /></div>` : ''}
       <div class="note-card__date">${formatDate(note.created_at)}</div>
-      <h3 class="note-card__title">${note.title || 'Sarlavsiz'}</h3>
-      <p class="note-card__preview">${stripMd(note.content).slice(0, 100)}${note.content.length > 100 ? '...' : ''}</p>
+      <h3 class="note-card__title">${escHtml(note.title || 'Sarlavsiz')}</h3>
+      <p class="note-card__preview">${escHtml(stripMd(note.content).slice(0, 100))}${note.content.length > 100 ? '...' : ''}</p>
     `;
     card.addEventListener('click', () => openNote(note));
     grid.appendChild(card);
   });
 }
 
-// Formatting bar
 document.querySelectorAll('.fmt-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const ta = document.getElementById('noteContent');
@@ -334,7 +491,6 @@ document.querySelectorAll('.fmt-btn').forEach(btn => {
   });
 });
 
-// Image upload
 document.getElementById('noteImage').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -372,8 +528,7 @@ document.getElementById('saveNoteBtn').addEventListener('click', async () => {
   if (!content) return;
   const title = document.getElementById('noteTitle').value.trim();
   const { error } = await _supabase.from('notes').insert({
-    user_id: currentUser.id, title, content,
-    image: pendingImageB64 || null
+    user_id: currentUser.id, title, content, image: pendingImageB64 || null
   });
   if (!error) {
     document.getElementById('noteTitle').value = '';
@@ -421,6 +576,49 @@ const PALETTE = [
   '#ffffff','#f3f4f6','#9ca3af','#4b5563','#1f2937',
 ];
 
+const canvas = document.getElementById('drawCanvas');
+const ctx = canvas.getContext('2d');
+const state = { drawing: false, color: '#ec4899', size: 4, tool: 'brush', template: null };
+let lastX = 0, lastY = 0;
+
+function hexToRgba(hex) {
+  const h = hex.replace('#','');
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16), 255];
+}
+
+function floodFill(startX, startY) {
+  startX = Math.round(startX); startY = Math.round(startY);
+  const W = canvas.width, H = canvas.height;
+  if (startX < 0 || startX >= W || startY < 0 || startY >= H) return;
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const d = imgData.data;
+  const i0 = (startY * W + startX) * 4;
+  const [tr, tg, tb, ta] = [d[i0], d[i0+1], d[i0+2], d[i0+3]];
+  const [fr, fg, fb] = hexToRgba(state.color);
+  if (tr === fr && tg === fg && tb === fb) return;
+  const tol = 35;
+  function match(i) {
+    return Math.abs(d[i]-tr) < tol && Math.abs(d[i+1]-tg) < tol && Math.abs(d[i+2]-tb) < tol && Math.abs(d[i+3]-ta) < tol;
+  }
+  const visited = new Uint8Array(W * H);
+  const stack = [startX + startY * W];
+  while (stack.length) {
+    const pos = stack.pop();
+    if (pos < 0 || pos >= W * H) continue;
+    if (visited[pos]) continue;
+    const x = pos % W, y = (pos / W) | 0;
+    const i = pos * 4;
+    if (!match(i)) continue;
+    visited[pos] = 1;
+    d[i] = fr; d[i+1] = fg; d[i+2] = fb; d[i+3] = 255;
+    if (x + 1 < W)  stack.push(pos + 1);
+    if (x - 1 >= 0) stack.push(pos - 1);
+    if (y + 1 < H)  stack.push(pos + W);
+    if (y - 1 >= 0) stack.push(pos - W);
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
 function initCanvas() {
   const palette = document.getElementById('colorPalette');
   PALETTE.forEach(c => {
@@ -454,6 +652,7 @@ function initCanvas() {
   });
 
   document.getElementById('toolBrush').addEventListener('click', () => setTool('brush'));
+  document.getElementById('toolFill').addEventListener('click', () => setTool('fill'));
   document.getElementById('toolEraser').addEventListener('click', () => setTool('eraser'));
 
   document.getElementById('clearCanvas').addEventListener('click', () => {
@@ -493,11 +692,6 @@ function initCanvas() {
   setupCanvasDrawing();
 }
 
-const canvas = document.getElementById('drawCanvas');
-const ctx = canvas.getContext('2d');
-const state = { drawing: false, color: '#ec4899', size: 4, tool: 'brush', template: null };
-let lastX = 0, lastY = 0;
-
 function resizeCanvas() {
   const wrap = document.querySelector('.canvas-wrap');
   const w = wrap.clientWidth;
@@ -520,13 +714,14 @@ window.addEventListener('resize', () => {
 function setTool(tool) {
   state.tool = tool;
   document.getElementById('toolBrush').classList.toggle('tool-btn--active', tool === 'brush');
+  document.getElementById('toolFill').classList.toggle('tool-btn--active', tool === 'fill');
   document.getElementById('toolEraser').classList.toggle('tool-btn--active', tool === 'eraser');
+  canvas.style.cursor = tool === 'fill' ? 'cell' : 'crosshair';
 }
 
 function getPos(e, cvs) {
   const r = cvs.getBoundingClientRect();
   const src = e.touches ? e.touches[0] : e;
-  // Scale CSS pixels → canvas buffer pixels
   return {
     x: (src.clientX - r.left) * (cvs.width / r.width),
     y: (src.clientY - r.top)  * (cvs.height / r.height),
@@ -535,6 +730,11 @@ function getPos(e, cvs) {
 
 function startDraw(e) {
   e.preventDefault();
+  if (state.tool === 'fill') {
+    const { x, y } = getPos(e, canvas);
+    floodFill(x, y);
+    return;
+  }
   state.drawing = true;
   const p = getPos(e, canvas);
   lastX = p.x; lastY = p.y;
@@ -542,7 +742,7 @@ function startDraw(e) {
 
 function draw(e) {
   e.preventDefault();
-  if (!state.drawing) return;
+  if (!state.drawing || state.tool === 'fill') return;
   const { x, y } = getPos(e, canvas);
   ctx.beginPath();
   ctx.moveTo(lastX, lastY);
@@ -568,112 +768,77 @@ function setupCanvasDrawing() {
   canvas.addEventListener('touchend', endDraw, { passive: false });
 }
 
-// Templates (SVG-style drawn with Canvas API)
+// Templates
 function drawTemplate(name) {
   const w = canvas.width, h = canvas.height;
   const cx = w / 2, cy = h / 2;
   ctx.save();
   ctx.strokeStyle = '#d1d5db';
   ctx.lineWidth = 2;
-  ctx.fillStyle = 'transparent';
 
   if (name === 'flower') {
     const r = Math.min(w, h) * 0.18;
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
       const px = cx + Math.cos(angle) * r, py = cy + Math.sin(angle) * r;
-      ctx.beginPath();
-      ctx.ellipse(px, py, r * 0.55, r * 0.3, angle, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(px, py, r * 0.55, r * 0.3, angle, 0, Math.PI * 2); ctx.stroke();
     }
     ctx.beginPath(); ctx.arc(cx, cy, r * 0.35, 0, Math.PI * 2); ctx.stroke();
-    // Leaves
     const lr = r * 1.7;
     for (let i = 0; i < 3; i++) {
       const a = (i / 3) * Math.PI * 2 + Math.PI / 6;
-      ctx.beginPath();
-      ctx.ellipse(cx + Math.cos(a) * lr, cy + Math.sin(a) * lr, r * 0.6, r * 0.22, a, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(cx + Math.cos(a) * lr, cy + Math.sin(a) * lr, r * 0.6, r * 0.22, a, 0, Math.PI * 2); ctx.stroke();
     }
   }
 
   if (name === 'butterfly') {
     const s = Math.min(w, h) * 0.35;
-    // Upper wings
-    ctx.beginPath();
-    ctx.ellipse(cx - s * 0.55, cy - s * 0.35, s * 0.5, s * 0.65, -0.5, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.ellipse(cx + s * 0.55, cy - s * 0.35, s * 0.5, s * 0.65, 0.5, 0, Math.PI * 2);
-    ctx.stroke();
-    // Lower wings
-    ctx.beginPath();
-    ctx.ellipse(cx - s * 0.45, cy + s * 0.3, s * 0.38, s * 0.45, 0.3, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.ellipse(cx + s * 0.45, cy + s * 0.3, s * 0.38, s * 0.45, -0.3, 0, Math.PI * 2);
-    ctx.stroke();
-    // Body
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, s * 0.08, s * 0.55, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    // Antennae
-    ctx.beginPath(); ctx.moveTo(cx, cy - s * 0.55);
-    ctx.quadraticCurveTo(cx - s * 0.3, cy - s * 0.9, cx - s * 0.25, cy - s); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx, cy - s * 0.55);
-    ctx.quadraticCurveTo(cx + s * 0.3, cy - s * 0.9, cx + s * 0.25, cy - s); ctx.stroke();
-    ctx.beginPath(); ctx.arc(cx - s * 0.25, cy - s, 4, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(cx + s * 0.25, cy - s, 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx - s*0.55, cy - s*0.35, s*0.5, s*0.65, -0.5, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx + s*0.55, cy - s*0.35, s*0.5, s*0.65, 0.5, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx - s*0.45, cy + s*0.3, s*0.38, s*0.45, 0.3, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx + s*0.45, cy + s*0.3, s*0.38, s*0.45, -0.3, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, s*0.08, s*0.55, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - s*0.55); ctx.quadraticCurveTo(cx - s*0.3, cy - s*0.9, cx - s*0.25, cy - s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - s*0.55); ctx.quadraticCurveTo(cx + s*0.3, cy - s*0.9, cx + s*0.25, cy - s); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx - s*0.25, cy - s, 4, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx + s*0.25, cy - s, 4, 0, Math.PI*2); ctx.stroke();
   }
 
   if (name === 'mandala') {
     const rings = [0.08, 0.16, 0.26, 0.38, 0.5];
     const r = Math.min(w, h) * 0.5;
-    rings.forEach(f => {
-      ctx.beginPath(); ctx.arc(cx, cy, r * f, 0, Math.PI * 2); ctx.stroke();
-    });
-    // Petals on each ring
+    rings.forEach(f => { ctx.beginPath(); ctx.arc(cx, cy, r*f, 0, Math.PI*2); ctx.stroke(); });
     [8, 12, 16].forEach((petals, ri) => {
       const pr = r * rings[ri + 1];
       for (let i = 0; i < petals; i++) {
         const a = (i / petals) * Math.PI * 2;
-        const px = cx + Math.cos(a) * pr * 0.75, py = cy + Math.sin(a) * pr * 0.75;
-        ctx.beginPath();
-        ctx.ellipse(px, py, pr * 0.15, pr * 0.28, a, 0, Math.PI * 2);
-        ctx.stroke();
+        const px = cx + Math.cos(a) * pr*0.75, py = cy + Math.sin(a) * pr*0.75;
+        ctx.beginPath(); ctx.ellipse(px, py, pr*0.15, pr*0.28, a, 0, Math.PI*2); ctx.stroke();
       }
     });
-    // Spokes
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + Math.cos(a) * r * 0.5, cy + Math.sin(a) * r * 0.5);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * r*0.5, cy + Math.sin(a) * r*0.5); ctx.stroke();
     }
   }
 
   if (name === 'heart') {
     const s = Math.min(w, h) * 0.38;
     ctx.beginPath();
-    ctx.moveTo(cx, cy + s * 0.6);
-    ctx.bezierCurveTo(cx - s * 1.1, cy, cx - s * 1.1, cy - s * 0.85, cx, cy - s * 0.3);
-    ctx.bezierCurveTo(cx + s * 1.1, cy - s * 0.85, cx + s * 1.1, cy, cx, cy + s * 0.6);
+    ctx.moveTo(cx, cy + s*0.6);
+    ctx.bezierCurveTo(cx - s*1.1, cy, cx - s*1.1, cy - s*0.85, cx, cy - s*0.3);
+    ctx.bezierCurveTo(cx + s*1.1, cy - s*0.85, cx + s*1.1, cy, cx, cy + s*0.6);
     ctx.stroke();
-    // Inner small heart
     const si = s * 0.45;
     ctx.beginPath();
-    ctx.moveTo(cx, cy + si * 0.6);
-    ctx.bezierCurveTo(cx - si * 1.1, cy + si * 0.1, cx - si * 1.1, cy - si * 0.75, cx, cy - si * 0.2);
-    ctx.bezierCurveTo(cx + si * 1.1, cy - si * 0.75, cx + si * 1.1, cy + si * 0.1, cx, cy + si * 0.6);
+    ctx.moveTo(cx, cy + si*0.6);
+    ctx.bezierCurveTo(cx - si*1.1, cy + si*0.1, cx - si*1.1, cy - si*0.75, cx, cy - si*0.2);
+    ctx.bezierCurveTo(cx + si*1.1, cy - si*0.75, cx + si*1.1, cy + si*0.1, cx, cy + si*0.6);
     ctx.stroke();
-    // Star points around
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
       const d = s * 0.9;
-      ctx.beginPath();
-      ctx.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d - s * 0.1, 5, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx + Math.cos(a)*d, cy + Math.sin(a)*d - s*0.1, 5, 0, Math.PI*2); ctx.stroke();
     }
   }
 
@@ -681,10 +846,9 @@ function drawTemplate(name) {
 }
 
 // ════════════════════════════════════════════
-// INSPIRATION ENGINE (AI + pool fallback)
+// INSPIRATION
 // ════════════════════════════════════════════
-const inspState = { mood: null, topic: null, shownIdxs: new Set(), currentIdx: null, lastAiText: null };
-
+const inspState = { mood: null, topic: null, shownIdxs: new Set(), currentIdx: null };
 const MOOD_LBL  = { happy:'baxtli', sad:'tushkun', strong:'kuchli va energiyali', anxious:'xavotirli', searching:'o\'zini qidiraman' };
 const TOPIC_LBL = { self:'o\'zini sevish va qadriyat', goals:'maqsadlar va o\'sish', hard:'qiyin kunlar va bardosh', creative:'ijod va salohiyat', relation:'munosabatlar va sevgi' };
 const MOOD_EMOJIS = { happy:'🌸', sad:'💙', strong:'⚡', anxious:'🌿', searching:'🔭' };
@@ -713,7 +877,6 @@ function initApiKeyUI() {
 async function callAnthropicAI(mood, topic) {
   const key = localStorage.getItem('anthropic_key');
   if (!key) return null;
-
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -728,13 +891,10 @@ async function callAnthropicAI(mood, topic) {
         max_tokens: 350,
         messages: [{
           role: 'user',
-          content: `Sen o'zbek tilida samimiy, mehribon va ilhomli do'stsiz. Foydalanuvchi hozir "${MOOD_LBL[mood]}" his qilyapti va "${TOPIC_LBL[topic]}" mavzusida ilhom olmoqchi.
-
-Har safar yangi, noyob, yurakdan chiqadigan ilhomli matn yoz (3-4 jumla). Ohangton samimiy va shaxsiy bo'lsin. Oxirgi qatorga faqat "💭" belgisi bilan boshlanadigan qisqa amaliy savol yoz. Boshqa hech narsa yozma — faqat ilhomli matn va savol.`
+          content: `Sen o'zbek tilida samimiy, mehribon va ilhomli do'stsiz. Foydalanuvchi hozir "${MOOD_LBL[mood]}" his qilyapti va "${TOPIC_LBL[topic]}" mavzusida ilhom olmoqchi.\n\nHar safar yangi, noyob, yurakdan chiqadigan ilhomli matn yoz (3-4 jumla). Ohangton samimiy va shaxsiy bo'lsin. Oxirgi qatorga faqat "💭" belgisi bilan boshlanadigan qisqa amaliy savol yoz. Boshqa hech narsa yozma.`
         }]
       })
     });
-
     if (res.status === 401) {
       localStorage.removeItem('anthropic_key');
       document.getElementById('aiKeySaved').classList.add('hidden');
@@ -742,10 +902,27 @@ Har safar yangi, noyob, yurakdan chiqadigan ilhomli matn yoz (3-4 jumla). Ohangt
       return null;
     }
     if (!res.ok) return null;
-
     const data = await res.json();
     return data.content?.[0]?.text || null;
   } catch { return null; }
+}
+
+function showHeartRain() {
+  const overlay = document.createElement('div');
+  overlay.className = 'heart-rain-overlay';
+  document.body.appendChild(overlay);
+  const hearts = ['❤️','💕','💖','💗','💝','🩷','💓','💞'];
+  for (let i = 0; i < 22; i++) {
+    const h = document.createElement('span');
+    h.className = 'falling-heart';
+    h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.animationDelay = Math.random() * 1.5 + 's';
+    h.style.animationDuration = (1.8 + Math.random() * 1.2) + 's';
+    h.style.fontSize = (0.9 + Math.random() * 1.6) + 'rem';
+    overlay.appendChild(h);
+  }
+  setTimeout(() => overlay.remove(), 4500);
 }
 
 function initInspiration() {
@@ -767,7 +944,7 @@ function initInspiration() {
     btn.addEventListener('click', () => {
       inspState.topic = btn.dataset.topic;
       inspState.shownIdxs.clear();
-      showInspiration();
+      showInspiration(true);
     });
   });
 
@@ -779,18 +956,39 @@ function initInspiration() {
     document.getElementById('inspResponse').classList.add('hidden');
   });
 
+  // Like: heart rain + redirect to diary
   document.getElementById('likeBtn').addEventListener('click', () => {
     const text = document.getElementById('inspText').textContent;
+    const prompt = document.getElementById('inspPrompt').textContent;
+    const emoji = document.getElementById('inspEmoji').textContent;
+
+    // Save to likes
     const likes = JSON.parse(localStorage.getItem('insp_likes') || '[]');
     if (!likes.includes(text)) likes.push(text);
     localStorage.setItem('insp_likes', JSON.stringify(likes));
+
+    // Heart rain animation
+    showHeartRain();
+
+    // After animation, go to diary with pre-filled note
     const btn = document.getElementById('likeBtn');
     btn.textContent = '❤️ Saqlandi!';
     btn.disabled = true;
-    setTimeout(() => { btn.textContent = '❤️ Yoqdi'; btn.disabled = false; }, 2000);
+
+    setTimeout(() => {
+      // Navigate to diary tab with pre-filled content
+      document.querySelector('.dnav[data-tab="notes"]').click();
+      document.getElementById('noteFormWrap').classList.remove('hidden');
+      document.getElementById('noteTitle').value = emoji + ' Ilhom — ' + new Date().toLocaleDateString('uz-UZ');
+      document.getElementById('noteContent').value = text + '\n\n' + prompt.replace('💭 ', '') + '\n\n(Bu yerga javob yozing...)';
+      document.getElementById('noteContent').focus();
+      btn.textContent = '❤️ Yoqdi';
+      btn.disabled = false;
+    }, 1500);
   });
 
-  document.getElementById('dislikeBtn').addEventListener('click', showInspiration);
+  // Dislike: immediately show next from pool (no AI re-call)
+  document.getElementById('dislikeBtn').addEventListener('click', () => showNextFromPool());
 
   document.getElementById('saveToDiary').addEventListener('click', () => {
     const text = document.getElementById('inspText').textContent;
@@ -804,22 +1002,37 @@ function initInspiration() {
   });
 }
 
-async function showInspiration() {
+function showNextFromPool() {
+  const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
+  if (!pool) return;
+  let candidates = pool.map((_,i)=>i).filter(i => !inspState.shownIdxs.has(i));
+  if (!candidates.length) { inspState.shownIdxs.clear(); candidates = pool.map((_,i)=>i); }
+  const idx = candidates[Math.floor(Math.random() * candidates.length)];
+  inspState.shownIdxs.add(idx);
+  inspState.currentIdx = idx;
+  const r = pool[idx];
+  const resp = document.getElementById('inspResponse');
+  resp.style.opacity = '0';
+  document.getElementById('inspEmoji').textContent = r.e;
+  document.getElementById('inspText').textContent = r.t;
+  document.getElementById('inspPrompt').textContent = '💭 ' + r.p;
+  document.getElementById('likeBtn').textContent = '❤️ Yoqdi';
+  document.getElementById('likeBtn').disabled = false;
+  setTimeout(() => { resp.style.transition = 'opacity 0.3s'; resp.style.opacity = '1'; }, 10);
+}
+
+async function showInspiration(useAI) {
   const resp = document.getElementById('inspResponse');
   document.getElementById('inspStep2').classList.add('hidden');
   resp.classList.remove('hidden');
   resp.style.opacity = '0';
-
-  // Show loading
   document.getElementById('inspEmoji').textContent = '✨';
   document.getElementById('inspText').textContent = 'Yozilmoqda...';
   document.getElementById('inspPrompt').textContent = '';
   document.getElementById('likeBtn').disabled = true;
   setTimeout(() => { resp.style.transition = 'opacity 0.4s'; resp.style.opacity = '1'; }, 10);
 
-  // Try AI first
-  const aiText = await callAnthropicAI(inspState.mood, inspState.topic);
-
+  const aiText = useAI ? await callAnthropicAI(inspState.mood, inspState.topic) : null;
   document.getElementById('likeBtn').disabled = false;
 
   if (aiText) {
@@ -830,33 +1043,30 @@ async function showInspiration() {
     document.getElementById('inspText').textContent = mainLines;
     document.getElementById('inspPrompt').textContent = promptLine ? promptLine.trim() : '';
   } else {
-    // Fallback to pool
-    const pool = INSP_POOL[inspState.mood]?.[inspState.topic];
-    if (!pool) return;
-    let candidates = pool.map((_, i) => i).filter(i => !inspState.shownIdxs.has(i));
-    if (!candidates.length) { inspState.shownIdxs.clear(); candidates = pool.map((_, i) => i); }
-    const idx = candidates[Math.floor(Math.random() * candidates.length)];
-    inspState.shownIdxs.add(idx);
-    inspState.currentIdx = idx;
-    const r = pool[idx];
-    document.getElementById('inspEmoji').textContent = r.e;
-    document.getElementById('inspText').textContent = r.t;
-    document.getElementById('inspPrompt').textContent = '💭 ' + r.p;
+    showNextFromPool();
+    return;
   }
 
   resp.style.opacity = '0';
   setTimeout(() => { resp.style.opacity = '1'; }, 10);
-  document.getElementById('likeBtn').textContent = '❤️ Yoqdi';
 }
 
 // ════════════════════════════════════════════
-// CHALLENGE (sequential)
+// CHALLENGE
 // ════════════════════════════════════════════
+let editingDay = null;
+
 async function loadChallenges() {
   const { data } = await _supabase
     .from('challenge_completions').select('day').eq('user_id', currentUser.id);
   completedDays = new Set((data || []).map(r => r.day));
   renderChallenges();
+}
+
+function getChallengeData(day) {
+  const base = CHALLENGES.find(c => c.day === day);
+  const custom = customChallenges[day] || {};
+  return { ...base, title: custom.title || base.title, desc: custom.desc || base.desc };
 }
 
 function renderChallenges() {
@@ -865,55 +1075,225 @@ function renderChallenges() {
   document.getElementById('progressFill').style.width = (count / 30 * 100) + '%';
 
   const currentDay = CHALLENGES.find(c => !completedDays.has(c.day)) || CHALLENGES[29];
+  const todayCh = getChallengeData(currentDay.day);
 
   const todayEl = document.getElementById('chToday');
   todayEl.innerHTML = `
-    <div class="ch-today-label">Bugungi vazifa — Kun ${currentDay.day}</div>
+    <div class="ch-today-label">Bugungi vazifa — Kun ${todayCh.day}</div>
     <div class="ch-today-card">
-      <span class="ch-today-icon">${currentDay.icon}</span>
+      <span class="ch-today-icon">${todayCh.icon}</span>
       <div class="ch-today-info">
-        <h3>${currentDay.title}</h3>
-        <p>${currentDay.desc}</p>
+        <h3>${escHtml(todayCh.title)}</h3>
+        <p>${escHtml(todayCh.desc)}</p>
       </div>
-      <button class="ch-today-btn ${completedDays.has(currentDay.day) ? 'done' : ''}"
-        data-day="${currentDay.day}">
-        ${completedDays.has(currentDay.day) ? '✅ Bajarildi' : 'Bajardim ✓'}
+      <button class="ch-today-btn ${completedDays.has(todayCh.day) ? 'done' : ''}" data-day="${todayCh.day}">
+        ${completedDays.has(todayCh.day) ? '✅ Bajarildi' : 'Bajardim ✓'}
       </button>
     </div>`;
-  todayEl.querySelector('.ch-today-btn').addEventListener('click', () =>
-    toggleChallenge(currentDay.day));
+  todayEl.querySelector('.ch-today-btn').addEventListener('click', () => toggleChallenge(todayCh.day));
 
   const grid = document.getElementById('chGrid');
   grid.innerHTML = '';
-  CHALLENGES.forEach(ch => {
+  CHALLENGES.forEach(base => {
+    const ch = getChallengeData(base.day);
     const done = completedDays.has(ch.day);
     const isCurrent = ch.day === currentDay.day;
-    // A day is locked if previous day not done AND not already completed
     const isLocked = !done && !isCurrent;
     const card = document.createElement('div');
     card.className = `ch-card ${done ? 'ch-card--done' : ''} ${isCurrent ? 'ch-card--current' : ''} ${isLocked ? 'ch-card--locked' : ''}`;
     card.innerHTML = `
+      ${!isLocked ? `<button class="ch-card__edit" data-day="${ch.day}" title="Tahrirlash">✏️</button>` : ''}
       <span class="ch-card__icon">${isLocked ? '🔒' : ch.icon}</span>
       <span class="ch-card__day">Kun ${ch.day}</span>
-      <span class="ch-card__name">${ch.title}</span>
+      <span class="ch-card__name">${escHtml(ch.title)}</span>
       ${done ? '<span class="ch-card__check">✓</span>' : ''}
     `;
-    if (!isLocked) card.addEventListener('click', () => toggleChallenge(ch.day));
+    if (!isLocked) card.addEventListener('click', e => {
+      if (e.target.closest('.ch-card__edit')) return;
+      toggleChallenge(ch.day);
+    });
     grid.appendChild(card);
+  });
+
+  // Edit buttons
+  grid.querySelectorAll('.ch-card__edit').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openEditChModal(parseInt(btn.dataset.day));
+    });
   });
 }
 
 async function toggleChallenge(day) {
   if (completedDays.has(day)) {
-    await _supabase.from('challenge_completions')
-      .delete().eq('user_id', currentUser.id).eq('day', day);
+    await _supabase.from('challenge_completions').delete().eq('user_id', currentUser.id).eq('day', day);
     completedDays.delete(day);
   } else {
-    await _supabase.from('challenge_completions')
-      .insert({ user_id: currentUser.id, day });
+    await _supabase.from('challenge_completions').insert({ user_id: currentUser.id, day });
+    const wasNew = !completedDays.has(day);
     completedDays.add(day);
+    if (wasNew) addCoin();
   }
   renderChallenges();
+}
+
+// Challenge edit modal
+function openEditChModal(day) {
+  editingDay = day;
+  const ch = getChallengeData(day);
+  document.getElementById('editChTitle').textContent = `Kun ${day} — tahrirlash`;
+  document.getElementById('editChName').value = ch.title;
+  document.getElementById('editChDesc').value = ch.desc;
+  document.getElementById('editChModal').classList.remove('hidden');
+  document.getElementById('editChName').focus();
+}
+
+document.getElementById('editChClose').addEventListener('click', () => {
+  document.getElementById('editChModal').classList.add('hidden');
+});
+document.getElementById('editChCancel').addEventListener('click', () => {
+  document.getElementById('editChModal').classList.add('hidden');
+});
+document.getElementById('editChModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('editChModal'))
+    document.getElementById('editChModal').classList.add('hidden');
+});
+document.getElementById('editChSave').addEventListener('click', () => {
+  if (!editingDay) return;
+  const title = document.getElementById('editChName').value.trim();
+  const desc = document.getElementById('editChDesc').value.trim();
+  if (!title) return;
+  customChallenges[editingDay] = { title, desc };
+  localStorage.setItem('custom_ch_' + currentUser.id, JSON.stringify(customChallenges));
+  document.getElementById('editChModal').classList.add('hidden');
+  renderChallenges();
+});
+document.getElementById('editChReset').addEventListener('click', () => {
+  if (!editingDay) return;
+  delete customChallenges[editingDay];
+  localStorage.setItem('custom_ch_' + currentUser.id, JSON.stringify(customChallenges));
+  document.getElementById('editChModal').classList.add('hidden');
+  renderChallenges();
+});
+
+// ════════════════════════════════════════════
+// CHAT
+// ════════════════════════════════════════════
+let allChatMessages = [];
+let selectedThreadId = null;
+
+async function initChat() {
+  if (isAdmin) {
+    document.getElementById('chatNotice').textContent = '👑 Admin paneli — foydalanuvchilar bilan yozishmalar';
+    await loadAdminThreads();
+  } else {
+    chatThreadUserId = currentUser.id;
+    selectedThreadId = currentUser.id;
+    await loadChatMessages(currentUser.id);
+    subscribeChat(currentUser.id);
+  }
+}
+
+async function loadChatMessages(threadId) {
+  const { data } = await _supabase.from('chat_messages')
+    .select('*').eq('thread_user_id', threadId).order('created_at', { ascending: true });
+  allChatMessages = data || [];
+  renderChat(allChatMessages);
+}
+
+function renderChat(messages) {
+  const list = document.getElementById('chatMsgList');
+  if (!messages.length) {
+    list.innerHTML = '<div class="chat-empty"><div class="chat-empty__icon">💬</div><p>Hali xabarlar yo\'q. Birinchi xabaringizni yuboring!</p></div>';
+    return;
+  }
+  list.innerHTML = messages.map(m => {
+    const isUser = m.sender_id === currentUser.id && !m.is_admin;
+    const isAdminMsg = m.is_admin;
+    const cls = (isAdmin ? (isAdminMsg ? 'chat-msg--user' : 'chat-msg--admin') : (isUser ? 'chat-msg--user' : 'chat-msg--admin'));
+    return `
+      <div class="chat-msg ${cls}">
+        ${!isUser && !isAdminMsg ? `<div class="chat-msg__sender">${escHtml(m.sender_name || 'Foydalanuvchi')}</div>` : ''}
+        ${isAdminMsg && !isAdmin ? `<div class="chat-msg__sender">💌 Mubina</div>` : ''}
+        <div class="chat-msg__bubble">${escHtml(m.message)}</div>
+        <div class="chat-msg__time">${formatTime(m.created_at)}</div>
+      </div>`;
+  }).join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+async function loadAdminThreads() {
+  const { data } = await _supabase.from('chat_messages')
+    .select('thread_user_id, sender_name, message, created_at')
+    .order('created_at', { ascending: false });
+  if (!data) return;
+
+  // Group by thread user
+  const threads = {};
+  data.forEach(m => {
+    if (!threads[m.thread_user_id]) {
+      threads[m.thread_user_id] = { name: m.sender_name || 'Foydalanuvchi', lastMsg: m.message };
+    }
+  });
+
+  const bar = document.getElementById('chatThreadsBar');
+  bar.classList.remove('hidden');
+  bar.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted);padding:0.2rem 0.5rem">Foydalanuvchilar:</span>';
+  Object.entries(threads).forEach(([uid, info]) => {
+    const chip = document.createElement('button');
+    chip.className = 'thread-chip';
+    chip.textContent = info.name;
+    chip.addEventListener('click', async () => {
+      document.querySelectorAll('.thread-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedThreadId = uid;
+      await loadChatMessages(uid);
+      subscribeChat(uid);
+    });
+    bar.appendChild(chip);
+  });
+
+  // Select first thread by default
+  const firstUid = Object.keys(threads)[0];
+  if (firstUid) {
+    bar.querySelectorAll('.thread-chip')[0]?.click();
+  }
+}
+
+function subscribeChat(threadId) {
+  if (chatChannel) chatChannel.unsubscribe();
+  chatChannel = _supabase.channel('chat-' + threadId)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'chat_messages',
+      filter: `thread_user_id=eq.${threadId}`
+    }, payload => {
+      allChatMessages.push(payload.new);
+      renderChat(allChatMessages);
+    }).subscribe();
+}
+
+document.getElementById('chatSendBtn').addEventListener('click', sendChat);
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg || !selectedThreadId) return;
+  input.value = '';
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true;
+
+  const userName = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+  await _supabase.from('chat_messages').insert({
+    thread_user_id: selectedThreadId,
+    sender_id: currentUser.id,
+    sender_name: userName,
+    message: msg,
+    is_admin: isAdmin
+  });
+  btn.disabled = false;
 }
 
 // ════════════════════════════════════════════
@@ -923,15 +1303,20 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('uz-UZ', { year:'numeric', month:'long', day:'numeric' });
 }
 
+function formatTime(iso) {
+  return new Date(iso).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
+}
+
 function stripMd(t) {
   return t.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
 }
 
 function renderMd(t) {
-  return t
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\n/g, '<br/>');
+  return t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n/g, '<br/>');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 init();
