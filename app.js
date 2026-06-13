@@ -1,0 +1,36 @@
+const SUPABASE_URL = 'https://abllpxqkyqebtawzwtrd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFibGxweHFreXFlYnRhd3p3dHJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyOTc4NTYsImV4cCI6MjA5Njg3Mzg1Nn0.5mEXCmxz2-QBSGuL3dodLNOesVTivAexo9yUIkihmVc';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const CHALLENGES = [
+  { day:  1, icon: '🌸', title: 'Shukrona',      desc: 'Bugun hayotingda 3 ta yaxshi narsani yoz' },
+  { day:  2, icon: '💧', title: 'Suv',            desc: 'Kamida 8 stakan suv ich' },
+  { day:  3, icon: '🧘', title: 'Meditatsiya',    desc: '10 daqiqa jim o\'tir, faqat nafas ol' },
+  { day:  4, icon: '📚', title: 'Kitob',          desc: '20 daqiqa kitob o\'qi' },
+  { day:  5, icon: '🌿', title: 'Sayr',           desc: '15 daqiqa tashqarida sayr qil' },
+  { day:  6, icon: '📵', title: 'Detox',          desc: '1 soat telefonsiz o\'tir' },
+  { day:  7, icon: '🍳', title: 'Yangi taom',     desc: 'Yangi retsept bo\'yicha taom pishir' },
+  { day:  8, icon: '💌', title: 'Do\'st',          desc: 'Uzoq ko\'rmagan do\'stingga xabar yoz' },
+  { day:  9, icon: '✍️', title: 'Yangi so\'z',    desc: 'Yangi so\'z o\'rgan va kunida ishlatib ko\'r' },
+  { day: 10, icon: '📋', title: 'Reja',           desc: 'Ertangi kunning rejasini yoz' },
+  { day: 11, icon: '💝', title: 'O\'zingni sev',  desc: '5 ta yaxshi fazilatingni yoz' },
+  { day: 12, icon: '🧹', title: 'Tartib',         desc: 'Xonangning bir burchagini tartibga keltir' },
+  { day: 13, icon: '🎨', title: 'Ijod',           desc: 'Rasm chiz, qo\'shiq ayt yoki she\'r yoz' },
+  { day: 14, icon: '🤝', title: 'Yaxshilik',      desc: 'Birovga kutilmagan yaxshilik qil' },
+  { day: 15, icon: '🎉', title: 'Yarim yo\'l!',   desc: '15 kun o\'tdi — o\'zingni tabriklash vaqti' },
+  { day: 16, icon: '🌅', title: 'Erta tur',       desc: 'Odatdagidan 30 daqiqa ertaroq tur' },
+  { day: 17, icon: '🏃', title: 'Harakat',        desc: '15 daqiqa jismoniy faoliyat: yugur, raqs, o\'yna' },
+  { day: 18, icon: '🔍', title: 'Yangi janr',     desc: 'Hech o\'qimagan janrdagi kitob tanlap ko\'r' },
+  { day: 19, icon: '🎙️', title: 'Podcast',       desc: 'Rivojlanish haqidagi podcast tinglang' },
+  { day: 20, icon: '🌟', title: 'Maqsad',         desc: '1 oylik maqsadingni yoz va tasavvur qil' },
+  { day: 21, icon: '🥗', title: 'Sog\'lom ovqat', desc: 'Bugun faqat uyda tayyorlangan taom ye' },
+  { day: 22, icon: '💡', title: 'Yangi mahorat',  desc: 'YouTube dan yangi bir narsa o\'rgan' },
+  { day: 23, icon: '📓', title: 'Jurnal',         desc: 'Bugungi his-tuyg\'ularingni batafsil yoz' },
+  { day: 24, icon: '✨', title: 'Ilhom',          desc: 'Seni ilhomlantirgan odamga maqtov yoz' },
+  { day: 25, icon: '☀️', title: 'Tabiat',         desc: '30 daqiqa tashqarida o\'tir, osmonga qara' },
+  { day: 26, icon: '🎵', title: 'Musiqa',         desc: 'Sevimli qo\'shig\'ingga to\'liq quloq sol' },
+  { day: 27, icon: '🕊️', title: 'Kechirish',     desc: 'Birovni yoki o\'zingni yurakdan kechir' },
+  { day: 28, icon: '🌷', title: 'Yordam',         desc: 'Oila yoki do\'stingga kutilmagan joyda yordam ber' },
+  { day: 29, icon: '📷', title: 'Xotira',         desc: 'Eng baxtli xotirangni yoz yoki rasmga ol' },
+  { day: 30, icon: '🏆', title: 'BARAKALLA!',     desc: '30 kunlik challengeni yakladingiz! Siz ajoyibsiz 🌸' },
+];

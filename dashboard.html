@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mening zonam | with Mubina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dash-body">
+
+  <!-- Header -->
+  <header class="dash-header">
+    <a href="index.html" class="dash-logo">with <em>Mubina</em></a>
+    <nav class="dash-nav">
+      <button class="dnav active" data-tab="notes">📓 Daftarim</button>
+      <button class="dnav" data-tab="challenge">🏆 30 Kun</button>
+    </nav>
+    <div class="dash-user">
+      <span id="userName"></span>
+      <button class="btn-logout" id="logoutBtn">Chiqish</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dash-main">
+
+    <!-- ── NOTES TAB ── -->
+    <section class="dtab dtab--active" id="tab-notes">
+      <div class="dtab-inner">
+        <div class="dtab-head">
+          <div>
+            <h2 class="dtab-title">Mening daftarim</h2>
+            <p class="dtab-sub">Fikrlaringni, his-tuyg'ularingni bu yerga yoz 🌸</p>
+          </div>
+          <button class="btn btn--primary" id="newNoteBtn">+ Yangi yozuv</button>
+        </div>
+
+        <!-- New note form -->
+        <div class="note-form-wrap hidden" id="noteFormWrap">
+          <div class="note-form">
+            <input type="text" id="noteTitle" placeholder="Sarlavha (ixtiyoriy)" class="note-form__title" />
+            <textarea id="noteContent" placeholder="Bugun nima haqida yozmoqchisiz?..." class="note-form__body" rows="5"></textarea>
+            <div class="note-form__actions">
+              <button class="btn btn--primary" id="saveNoteBtn">Saqlash</button>
+              <button class="btn btn--ghost" id="cancelNoteBtn">Bekor qilish</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes list -->
+        <div class="notes-grid" id="notesGrid">
+          <div class="notes-empty" id="notesEmpty">
+            <div class="notes-empty__icon">📝</div>
+            <p>Hali yozuvlar yo'q. Birinchi yozuvingizni qo'shing!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CHALLENGE TAB ── -->
+    <section class="dtab" id="tab-challenge">
+      <div class="dtab-inner">
+        <div class="dtab-head">
+          <div>
+            <h2 class="dtab-title">30 Kunlik Challenge</h2>
+            <p class="dtab-sub">Har kuni bir qadam oldinga 💫</p>
+          </div>
+          <div class="ch-progress-wrap">
+            <div class="ch-progress-label"><span id="completedCount">0</span>/30 bajarildi</div>
+            <div class="ch-progress-bar"><div class="ch-progress-fill" id="progressFill"></div></div>
+          </div>
+        </div>
+
+        <!-- Today's highlight -->
+        <div class="ch-today" id="chToday"></div>
+
+        <!-- All days grid -->
+        <div class="ch-grid" id="chGrid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Note viewer modal -->
+  <div class="modal-overlay hidden" id="noteModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle"></h3>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <p class="modal-date" id="modalDate"></p>
+      <div class="modal-body" id="modalContent"></div>
+      <button class="btn btn--danger" id="deleteNoteBtn">🗑 O'chirish</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+  <script>
+    let currentUser = null;
+    let notes = [];
+    let completedDays = new Set();
+    let viewingNoteId = null;
+
+    // ── Auth check ──
+    async function init() {
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (!session) { window.location.href = 'auth.html'; return; }
+      currentUser = session.user;
+      document.getElementById('userName').textContent =
+        currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+      await Promise.all([loadNotes(), loadChallenges()]);
+    }
+
+    // ── Logout ──
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await _supabase.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    // ── Tab switching ──
+    document.querySelectorAll('.dnav').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.dnav').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.dtab').forEach(t => t.classList.remove('dtab--active'));
+        document.getElementById('tab-' + tab).classList.add('dtab--active');
+      });
+    });
+
+    // ── Notes ──
+    async function loadNotes() {
+      const { data, error } = await _supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+      if (!error) { notes = data; renderNotes(); }
+    }
+
+    function renderNotes() {
+      const grid  = document.getElementById('notesGrid');
+      const empty = document.getElementById('notesEmpty');
+      grid.querySelectorAll('.note-card').forEach(el => el.remove());
+
+      if (!notes.length) { empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+
+      notes.forEach(note => {
+        const card = document.createElement('div');
+        card.className = 'note-card';
+        card.innerHTML = `
+          <div class="note-card__date">${formatDate(note.created_at)}</div>
+          <h3 class="note-card__title">${note.title || 'Sarlavsiz'}</h3>
+          <p class="note-card__preview">${note.content.slice(0, 120)}${note.content.length > 120 ? '...' : ''}</p>
+        `;
+        card.addEventListener('click', () => openNote(note));
+        grid.appendChild(card);
+      });
+    }
+
+    // New note form
+    document.getElementById('newNoteBtn').addEventListener('click', () => {
+      document.getElementById('noteFormWrap').classList.toggle('hidden');
+      document.getElementById('noteContent').focus();
+    });
+
+    document.getElementById('cancelNoteBtn').addEventListener('click', () => {
+      document.getElementById('noteFormWrap').classList.add('hidden');
+      document.getElementById('noteTitle').value = '';
+      document.getElementById('noteContent').value = '';
+    });
+
+    document.getElementById('saveNoteBtn').addEventListener('click', async () => {
+      const content = document.getElementById('noteContent').value.trim();
+      if (!content) return;
+      const title = document.getElementById('noteTitle').value.trim();
+
+      const { error } = await _supabase.from('notes').insert({
+        user_id: currentUser.id, title, content
+      });
+      if (!error) {
+        document.getElementById('noteTitle').value = '';
+        document.getElementById('noteContent').value = '';
+        document.getElementById('noteFormWrap').classList.add('hidden');
+        await loadNotes();
+      }
+    });
+
+    function openNote(note) {
+      viewingNoteId = note.id;
+      document.getElementById('modalTitle').textContent   = note.title || 'Sarlavsiz';
+      document.getElementById('modalDate').textContent    = formatDate(note.created_at);
+      document.getElementById('modalContent').textContent = note.content;
+      document.getElementById('noteModal').classList.remove('hidden');
+    }
+
+    document.getElementById('modalClose').addEventListener('click', () => {
+      document.getElementById('noteModal').classList.add('hidden');
+    });
+
+    document.getElementById('noteModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('noteModal'))
+        document.getElementById('noteModal').classList.add('hidden');
+    });
+
+    document.getElementById('deleteNoteBtn').addEventListener('click', async () => {
+      if (!confirm('Bu yozuvni o\'chirmoqchimisiz?')) return;
+      await _supabase.from('notes').delete().eq('id', viewingNoteId);
+      document.getElementById('noteModal').classList.add('hidden');
+      await loadNotes();
+    });
+
+    // ── Challenges ──
+    async function loadChallenges() {
+      const { data } = await _supabase
+        .from('challenge_completions')
+        .select('day')
+        .eq('user_id', currentUser.id);
+      completedDays = new Set((data || []).map(r => r.day));
+      renderChallenges();
+    }
+
+    function renderChallenges() {
+      const count = completedDays.size;
+      document.getElementById('completedCount').textContent = count;
+      document.getElementById('progressFill').style.width = (count / 30 * 100) + '%';
+
+      // Today's challenge = first uncompleted day
+      const todayChallenge = CHALLENGES.find(c => !completedDays.has(c.day)) || CHALLENGES[29];
+      const todayEl = document.getElementById('chToday');
+      todayEl.innerHTML = `
+        <div class="ch-today-label">Bugungi vazifa</div>
+        <div class="ch-today-card">
+          <span class="ch-today-icon">${todayChallenge.icon}</span>
+          <div class="ch-today-info">
+            <h3>Kun ${todayChallenge.day}: ${todayChallenge.title}</h3>
+            <p>${todayChallenge.desc}</p>
+          </div>
+          <button class="ch-today-btn ${completedDays.has(todayChallenge.day) ? 'done' : ''}"
+            data-day="${todayChallenge.day}">
+            ${completedDays.has(todayChallenge.day) ? '✅ Bajarildi' : 'Bajardim! ✓'}
+          </button>
+        </div>`;
+
+      todayEl.querySelector('.ch-today-btn').addEventListener('click', () =>
+        toggleChallenge(todayChallenge.day));
+
+      // Grid
+      const grid = document.getElementById('chGrid');
+      grid.innerHTML = '';
+      CHALLENGES.forEach(ch => {
+        const done = completedDays.has(ch.day);
+        const isCurrent = ch.day === todayChallenge.day;
+        const card = document.createElement('div');
+        card.className = `ch-card ${done ? 'ch-card--done' : ''} ${isCurrent ? 'ch-card--current' : ''}`;
+        card.innerHTML = `
+          <span class="ch-card__icon">${ch.icon}</span>
+          <span class="ch-card__day">Kun ${ch.day}</span>
+          <span class="ch-card__name">${ch.title}</span>
+          ${done ? '<span class="ch-card__check">✓</span>' : ''}
+        `;
+        card.addEventListener('click', () => toggleChallenge(ch.day));
+        grid.appendChild(card);
+      });
+    }
+
+    async function toggleChallenge(day) {
+      if (completedDays.has(day)) {
+        await _supabase.from('challenge_completions')
+          .delete().eq('user_id', currentUser.id).eq('day', day);
+        completedDays.delete(day);
+      } else {
+        await _supabase.from('challenge_completions')
+          .insert({ user_id: currentUser.id, day });
+        completedDays.add(day);
+      }
+      renderChallenges();
+    }
+
+    // ── Helpers ──
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    init();
+  </script>
+</body>
+</html>

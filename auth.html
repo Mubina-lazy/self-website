@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kirish | with Mubina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-wrap">
+    <a href="index.html" class="auth-back">← Asosiy sahifa</a>
+
+    <div class="auth-card">
+      <!-- Logo -->
+      <div class="auth-logo">
+        <div class="avatar avatar--sm">
+          <div class="avatar__ring"></div>
+          <div class="avatar__inner">M</div>
+        </div>
+        <h1 class="auth-title">with <em>Mubina</em></h1>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="atab atab--active" data-tab="login">Kirish</button>
+        <button class="atab" data-tab="register">Ro'yxat</button>
+      </div>
+
+      <!-- Login form -->
+      <form id="loginForm" class="aform">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="email@example.com" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label>Parol</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn--primary btn--full" id="loginBtn">Kirish</button>
+        <p class="aform__msg aform__msg--err" id="loginErr"></p>
+      </form>
+
+      <!-- Register form -->
+      <form id="registerForm" class="aform aform--hidden">
+        <div class="field">
+          <label>Ism</label>
+          <input type="text" id="regName" placeholder="Ismingiz" required />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="email@example.com" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label>Parol</label>
+          <input type="password" id="regPassword" placeholder="Min. 6 ta belgi" required minlength="6" autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn btn--primary btn--full" id="regBtn">Ro'yxatdan o'tish</button>
+        <p class="aform__msg aform__msg--err" id="regErr"></p>
+        <p class="aform__msg aform__msg--ok" id="regOk"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+  <script>
+    // Redirect if already logged in
+    _supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = 'dashboard.html';
+    });
+
+    // Tab switch
+    document.querySelectorAll('.atab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.atab').forEach(t => t.classList.remove('atab--active'));
+        tab.classList.add('atab--active');
+        const isLogin = tab.dataset.tab === 'login';
+        document.getElementById('loginForm').classList.toggle('aform--hidden', !isLogin);
+        document.getElementById('registerForm').classList.toggle('aform--hidden', isLogin);
+      });
+    });
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const errEl = document.getElementById('loginErr');
+      errEl.textContent = '';
+      btn.textContent = 'Yuklanmoqda...';
+      btn.disabled = true;
+
+      const { error } = await _supabase.auth.signInWithPassword({
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value,
+      });
+
+      if (error) {
+        errEl.textContent = error.message.includes('Invalid') ? 'Email yoki parol noto\'g\'ri' : error.message;
+        btn.textContent = 'Kirish';
+        btn.disabled = false;
+      } else {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    // Register
+    document.getElementById('registerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('regBtn');
+      const errEl = document.getElementById('regErr');
+      const okEl  = document.getElementById('regOk');
+      errEl.textContent = '';
+      okEl.textContent  = '';
+      btn.textContent = 'Yuklanmoqda...';
+      btn.disabled = true;
+
+      const { data, error } = await _supabase.auth.signUp({
+        email:    document.getElementById('regEmail').value,
+        password: document.getElementById('regPassword').value,
+        options:  { data: { name: document.getElementById('regName').value } },
+      });
+
+      if (error) {
+        errEl.textContent = error.message;
+        btn.textContent = 'Ro\'yxatdan o\'tish';
+        btn.disabled = false;
+      } else if (data.session) {
+        window.location.href = 'dashboard.html';
+      } else {
+        okEl.textContent = '✅ Emailingizga tasdiqlash xati yuborildi. Tekshiring va kirib keling!';
+        btn.textContent = 'Ro\'yxatdan o\'tish';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
