@@ -1533,6 +1533,87 @@ body {
 }
 
 /* ════════════════════════════════
+   BIRTHDAY CELEBRATION
+   ════════════════════════════════ */
+.birthday-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(10,5,20,0.88);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  animation: bday-fade-in 0.6s ease forwards;
+}
+@keyframes bday-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.birthday-overlay.fade-out {
+  animation: bday-fade-out 1s ease forwards;
+}
+@keyframes bday-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; pointer-events: none; }
+}
+
+.bday-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 9vw, 6rem);
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  line-height: 1.15;
+  text-shadow: 0 0 40px rgba(249,168,212,0.8), 0 0 80px rgba(196,181,253,0.5);
+  animation: bday-bounce 0.8s cubic-bezier(.36,.07,.19,.97) both 0.4s;
+}
+@keyframes bday-bounce {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.15); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.bday-title em {
+  font-style: italic;
+  background: linear-gradient(90deg, #f9a8d4, #c4b5fd, #fcd34d, #f9a8d4);
+  background-size: 200%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: rainbow-shift 2s linear infinite;
+}
+@keyframes rainbow-shift { to { background-position: 200% center; } }
+
+.bday-sub {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: rgba(255,255,255,0.8);
+  margin-top: 0.75rem;
+  text-align: center;
+  animation: bday-bounce 0.8s cubic-bezier(.36,.07,.19,.97) both 0.7s;
+}
+.bday-emojis {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  letter-spacing: 0.2em;
+  margin-top: 1.5rem;
+  animation: bday-bounce 0.8s cubic-bezier(.36,.07,.19,.97) both 1s;
+}
+.bday-close-hint {
+  position: absolute; bottom: 2rem;
+  font-size: 0.85rem; color: rgba(255,255,255,0.4);
+  animation: fade-up 1s ease both 2s;
+}
+
+/* Firework particles */
+.firework {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10001;
+  border-radius: 50%;
+  animation: firework-burst linear forwards;
+}
+@keyframes firework-burst {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ════════════════════════════════
    RESPONSIVE ADDITIONS
    ════════════════════════════════ */
 @media (max-width: 640px) {

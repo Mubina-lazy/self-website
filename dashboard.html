@@ -330,6 +330,7 @@ async function init() {
   updateCoinDisplay();
   addHeaderDeco();
   triggerWelcomeMoney();
+  checkBirthday();
 
   await Promise.all([loadNotes(), loadChallenges()]);
   initCanvas();
@@ -438,6 +439,74 @@ function triggerWelcomeMoney() {
       }
       setTimeout(() => overlay.remove(), 4000);
     }, 800);
+  }
+}
+
+// ════════════════════════════════════════════
+// BIRTHDAY
+// ════════════════════════════════════════════
+function checkBirthday() {
+  const bday = currentUser.user_metadata?.birthday;
+  if (!bday) return;
+  const today = new Date();
+  const bdayDate = new Date(bday);
+  if (today.getMonth() !== bdayDate.getMonth() || today.getDate() !== bdayDate.getDate()) return;
+
+  // Don't show more than once per day
+  const key = 'bday_shown_' + currentUser.id + '_' + today.toDateString();
+  if (sessionStorage.getItem(key)) return;
+  sessionStorage.setItem(key, '1');
+
+  const name = currentUser.user_metadata?.name || '';
+  showBirthdayOverlay(name);
+}
+
+function showBirthdayOverlay(name) {
+  const overlay = document.createElement('div');
+  overlay.className = 'birthday-overlay';
+  overlay.innerHTML = `
+    <div class="bday-title">🎂 Happy <em>Birthday</em>!</div>
+    <div class="bday-sub">${escHtml(name) ? escHtml(name) + ', bugun sening kunding! 🎉' : 'Bugun sening kunding! 🎉'}</div>
+    <div class="bday-emojis">🎈🎁🎊🥳🌟</div>
+    <div class="bday-close-hint">Bosing yoki 5 soniyadan keyin yopiladi</div>
+  `;
+  overlay.style.pointerEvents = 'auto';
+  overlay.addEventListener('click', () => closeBdayOverlay(overlay));
+  document.body.appendChild(overlay);
+
+  // Launch fireworks
+  const interval = setInterval(() => launchFirework(), 300);
+  setTimeout(() => {
+    clearInterval(interval);
+    closeBdayOverlay(overlay);
+  }, 6000);
+}
+
+function closeBdayOverlay(overlay) {
+  overlay.classList.add('fade-out');
+  setTimeout(() => overlay.remove(), 1000);
+}
+
+function launchFirework() {
+  const colors = ['#f9a8d4','#c4b5fd','#fcd34d','#6ee7b7','#93c5fd','#fda4af','#a78bfa','#fbbf24'];
+  const x = Math.random() * window.innerWidth;
+  const y = Math.random() * window.innerHeight * 0.7;
+  const count = 20 + Math.floor(Math.random() * 20);
+  for (let i = 0; i < count; i++) {
+    const spark = document.createElement('div');
+    spark.className = 'firework';
+    const size = 4 + Math.random() * 6;
+    const angle = (i / count) * Math.PI * 2;
+    const dist = 60 + Math.random() * 100;
+    const tx = Math.cos(angle) * dist;
+    const ty = Math.sin(angle) * dist;
+    const dur = 600 + Math.random() * 600;
+    spark.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]}`;
+    document.body.appendChild(spark);
+    spark.animate([
+      { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+    ], { duration: dur, easing: 'ease-out' }).onfinish = () => spark.remove();
   }
 }
 
