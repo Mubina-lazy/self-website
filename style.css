@@ -1017,24 +1017,6 @@ body {
 .draw-actions-top { display: flex; gap: 0.75rem; }
 
 /* ════ INSPIRATION ════ */
-.inspire-stickers {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-.isticker {
-  position: absolute;
-  display: block;
-  animation: isticker-float 4s ease-in-out infinite;
-  opacity: 0.75;
-  filter: drop-shadow(0 2px 6px rgba(236,72,153,0.15));
-  user-select: none;
-}
-@keyframes isticker-float {
-  0%,100% { transform: translateY(0) rotate(-4deg) scale(1); }
-  50%      { transform: translateY(-10px) rotate(4deg) scale(1.08); }
-}
 #tab-inspire { position: relative; }
 #tab-inspire .dtab-inner { position: relative; z-index: 1; }
 
