@@ -516,7 +516,11 @@ function launchFlightAnimation(emoji, gender) {
     };
   }
 
-  const dashColor = gender === 'girl' ? 'rgba(236,72,153,0.8)' : 'rgba(251,191,36,0.85)';
+  // Comet-tail colour: pink for the airplane, amber for the rocket
+  const trailRGBA = gender === 'girl'
+    ? (p) => `rgba(236,72,153,${(p * 0.85).toFixed(3)})`
+    : (p) => `rgba(251,191,36,${(p * 0.9).toFixed(3)})`;
+  const trailGlow = gender === 'girl' ? 'rgba(236,72,153,0.6)' : 'rgba(251,191,36,0.6)';
   // ✈️ and 🚀 both point to the upper-right (NE) by default → rotate by +45°
   const ROT_OFFSET = 45;
 
@@ -540,15 +544,16 @@ function launchFlightAnimation(emoji, gender) {
       lastX = p0.x; lastY = p0.y;
     }
     const elapsed = ts - startTime;
-    const currentLoop = Math.floor(elapsed / LOOP_MS);
-    if (currentLoop !== loopIndex) { loopIndex = currentLoop; trail = []; }
 
     const { x, y } = posAt(elapsed);
-    // Only the girl's airplane draws a heart trail; the rocket just flies freely
-    const drawTrail = gender === 'girl';
-    if (drawTrail) {
-      trail.push({ x, y });
-      if (trail.length > 900) trail.shift();
+    trail.push({ x, y });
+
+    // Keep only a short comet tail (~2 cm) — drop the oldest points beyond that length
+    const MAX_TAIL = 76;  // ≈ 2 cm at 96 dpi
+    let total = 0;
+    for (let i = trail.length - 1; i > 0; i--) {
+      total += Math.hypot(trail[i].x - trail[i-1].x, trail[i].y - trail[i-1].y);
+      if (total > MAX_TAIL) { trail.splice(0, i); break; }
     }
 
     // Smoothly ease the nose toward the travel direction (no sharp snaps)
@@ -561,28 +566,22 @@ function launchFlightAnimation(emoji, gender) {
     el.style.top  = (y - 16) + 'px';
     el.style.transform = `rotate(${(curAngle || 0).toFixed(2)}deg)`;
 
-    // Draw the trail as a smooth curve (quadratic through midpoints) → soft, not jagged
+    // Draw short fading comet tail (newest near the craft = bright, fades to nothing)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (drawTrail && trail.length > 2) {
-      ctx.setLineDash([6, 8]);
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = dashColor;
-      ctx.shadowColor = dashColor;
-      ctx.shadowBlur = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = trailGlow;
+    ctx.shadowBlur = 5;
+    for (let i = 1; i < trail.length; i++) {
+      const p = i / trail.length;            // 0 = tail (old) … 1 = head (near craft)
       ctx.beginPath();
-      ctx.moveTo(trail[0].x, trail[0].y);
-      for (let i = 1; i < trail.length - 1; i++) {
-        const xc = (trail[i].x + trail[i + 1].x) / 2;
-        const yc = (trail[i].y + trail[i + 1].y) / 2;
-        ctx.quadraticCurveTo(trail[i].x, trail[i].y, xc, yc);
-      }
-      ctx.lineTo(trail[trail.length - 1].x, trail[trail.length - 1].y);
+      ctx.moveTo(trail[i-1].x, trail[i-1].y);
+      ctx.lineTo(trail[i].x, trail[i].y);
+      ctx.strokeStyle = trailRGBA(p);
+      ctx.lineWidth = 1 + p * 2.5;
       ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.setLineDash([]);
     }
+    ctx.shadowBlur = 0;
 
     lastX = x; lastY = y;
     requestAnimationFrame(frame);
