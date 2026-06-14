@@ -1939,20 +1939,17 @@ async function initPushNotifications() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   if (isAdmin) return;
 
-  // Already granted before
-  if (localStorage.getItem('push_granted_' + currentUser.id)) {
-    await subscribePush();
-    return;
-  }
-  // Already denied — don't ask again
-  if (Notification.permission === 'denied') return;
-  // Already granted by browser
+  // If the browser already granted permission → just (re)subscribe silently.
+  // Never show the banner or ask again.
   if (Notification.permission === 'granted') {
     await subscribePush();
     return;
   }
+  // User explicitly blocked in the browser — respect it, don't nag.
+  if (Notification.permission === 'denied') return;
 
-  // Show our soft banner first
+  // Permission is still "default". Only show our soft banner once per browser.
+  if (localStorage.getItem('push_banner_answered')) return;
   showPushBanner();
 }
 
@@ -1972,11 +1969,12 @@ function showPushBanner() {
 
   document.getElementById('pushYes').onclick = async () => {
     banner.remove();
+    localStorage.setItem('push_banner_answered', '1');
     await subscribePush();
   };
   document.getElementById('pushNo').onclick = () => {
     banner.remove();
-    localStorage.setItem('push_denied_' + currentUser.id, '1');
+    localStorage.setItem('push_banner_answered', '1');
   };
 }
 
