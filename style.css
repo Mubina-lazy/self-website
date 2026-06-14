@@ -1871,17 +1871,16 @@ body {
 @media (max-width: 640px) {
   .coin-balance { font-size: 0.75rem; padding: 0.2rem 0.55rem; }
   .dtab-inner--chat {
-    height: calc(100dvh - 120px);
+    height: calc(100dvh - 140px);
     flex-direction: column;
-    /* Keyboard-aware: don't let the container go behind the keyboard */
-    max-height: calc(100dvh - 120px);
+    max-height: calc(100dvh - 140px);
   }
   .dm-sidebar { width: 100%; min-width: unset; height: 160px; border-right: none; border-bottom: 1px solid rgba(249,168,212,0.2); flex-shrink: 0; }
   .chat-msg { max-width: 90%; }
   .chat-main { min-height: 0; overflow: hidden; }
   .chat-msg-list { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   /* Compact input row so the send button always fits on screen */
-  .chat-input-row { gap: 0.4rem; padding: 0.5rem 0.55rem; padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); flex-shrink: 0; }
+  .chat-input-row { gap: 0.4rem; padding: 0.5rem 0.55rem; padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem)); margin-bottom: 0.5rem; flex-shrink: 0; }
   .chat-icon-btn { width: 40px; height: 40px; min-width: 40px; flex-shrink: 0; font-size: 1.15rem; }
   .chat-input { flex: 1; min-width: 0; padding: 0.6rem 0.9rem; font-size: 0.9rem; }
   .chat-input-row .btn--primary {
