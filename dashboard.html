@@ -1897,6 +1897,91 @@ function escHtml(s) {
 }
 
 init();
+
+// ════════════════════════════════════════════
+// WEB PUSH NOTIFICATIONS
+// ════════════════════════════════════════════
+const VAPID_PUBLIC = 'E5PNWsgtY3lCHfSpt7WPFrkQboUSlH54dLO2egUSXk7IwAEMxnalDhkWT7l8sOBrZpyTdZdCnG7bA0G3iG5JUg';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function subscribePush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('/self-website/sw.js');
+    await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
+      });
+    }
+    const subJson = sub.toJSON();
+    await _supabase.from('push_subscriptions').upsert({
+      user_id: currentUser.id,
+      endpoint: subJson.endpoint,
+      p256dh: subJson.keys.p256dh,
+      auth: subJson.keys.auth
+    }, { onConflict: 'user_id,endpoint' });
+    localStorage.setItem('push_granted_' + currentUser.id, '1');
+  } catch(e) {
+    console.warn('Push setup xato:', e);
+  }
+}
+
+async function initPushNotifications() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (isAdmin) return;
+
+  // Already granted before
+  if (localStorage.getItem('push_granted_' + currentUser.id)) {
+    await subscribePush();
+    return;
+  }
+  // Already denied — don't ask again
+  if (Notification.permission === 'denied') return;
+  // Already granted by browser
+  if (Notification.permission === 'granted') {
+    await subscribePush();
+    return;
+  }
+
+  // Show our soft banner first
+  showPushBanner();
+}
+
+function showPushBanner() {
+  if (document.getElementById('pushBanner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'pushBanner';
+  banner.className = 'push-banner';
+  banner.innerHTML = `
+    <span style="font-size:1.5rem">🔔</span>
+    <p>Mubinadan yangi habarlar kelganda bildirishnoma olishni xohlaysizmi?</p>
+    <div class="push-banner__btns">
+      <button class="push-banner__yes" id="pushYes">Ha</button>
+      <button class="push-banner__no" id="pushNo">Yo'q</button>
+    </div>`;
+  document.body.appendChild(banner);
+
+  document.getElementById('pushYes').onclick = async () => {
+    banner.remove();
+    await subscribePush();
+  };
+  document.getElementById('pushNo').onclick = () => {
+    banner.remove();
+    localStorage.setItem('push_denied_' + currentUser.id, '1');
+  };
+}
+
+// Call after init (non-blocking)
+setTimeout(() => initPushNotifications(), 2500);
   </script>
 </body>
 </html>

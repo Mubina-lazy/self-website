@@ -1874,3 +1874,23 @@ body {
   .dm-sidebar { width: 100%; min-width: unset; height: 200px; border-right: none; border-bottom: 1px solid rgba(249,168,212,0.2); }
   .chat-msg { max-width: 90%; }
 }
+
+
+/* ════════════════════════════════
+   PUSH NOTIFICATION BANNER
+   ════════════════════════════════ */
+.push-banner {
+  position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, #fce4f3 0%, #e8d5f5 100%);
+  border: 1px solid rgba(249,168,212,0.5);
+  border-radius: 16px; padding: 0.85rem 1.2rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  box-shadow: 0 8px 32px rgba(236,72,153,0.15);
+  z-index: 9000; max-width: 360px; width: calc(100% - 2rem);
+  animation: slide-up 0.4s cubic-bezier(.34,1.56,.64,1);
+}
+.push-banner p { font-size: 0.82rem; color: #4a2030; flex: 1; line-height: 1.4; }
+.push-banner__btns { display: flex; gap: 0.5rem; }
+.push-banner__yes { background: #ec4899; color: #fff; border: none; border-radius: 10px; padding: 0.4rem 0.9rem; font-size: 0.78rem; cursor: pointer; font-weight: 600; }
+.push-banner__no { background: transparent; color: #8b5a6e; border: 1px solid #fda4af; border-radius: 10px; padding: 0.4rem 0.7rem; font-size: 0.78rem; cursor: pointer; }
+@keyframes slide-up { from { opacity:0; transform: translateX(-50%) translateY(20px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
