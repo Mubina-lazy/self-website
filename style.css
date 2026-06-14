@@ -1870,9 +1870,17 @@ body {
    ════════════════════════════════ */
 @media (max-width: 640px) {
   .coin-balance { font-size: 0.75rem; padding: 0.2rem 0.55rem; }
-  .dtab-inner--chat { height: calc(100vh - 120px); flex-direction: column; }
-  .dm-sidebar { width: 100%; min-width: unset; height: 200px; border-right: none; border-bottom: 1px solid rgba(249,168,212,0.2); }
+  .dtab-inner--chat {
+    height: calc(100dvh - 120px);
+    flex-direction: column;
+    /* Keyboard-aware: don't let the container go behind the keyboard */
+    max-height: calc(100dvh - 120px);
+  }
+  .dm-sidebar { width: 100%; min-width: unset; height: 160px; border-right: none; border-bottom: 1px solid rgba(249,168,212,0.2); flex-shrink: 0; }
   .chat-msg { max-width: 90%; }
+  .chat-main { min-height: 0; overflow: hidden; }
+  .chat-msg-list { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .chat-input-row { flex-shrink: 0; }
 }
 
 

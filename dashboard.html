@@ -1980,6 +1980,14 @@ function showPushBanner() {
 
 // Call after init (non-blocking)
 setTimeout(() => initPushNotifications(), 2500);
+
+// Mobile keyboard: scroll chat to bottom when keyboard opens
+if ('visualViewport' in window) {
+  window.visualViewport.addEventListener('resize', () => {
+    const list = document.getElementById('chatMsgList');
+    if (list) setTimeout(() => list.scrollTop = list.scrollHeight, 100);
+  });
+}
   </script>
 </body>
 </html>
