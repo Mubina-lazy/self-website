@@ -1,0 +1,31 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Project data: raw/processed data is never committed (download by script) ---
+data/raw/
+data/processed/
+*.zip
+
+# --- Experiment / model artifacts (Model Gate onward) ---
+mlruns/
+models/*.pkl
+models/*.joblib
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
